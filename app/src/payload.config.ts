@@ -4,8 +4,10 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
+import { AITasks } from './collections/AITasks'
 import { Categories } from './collections/Categories'
 import { Chapters } from './collections/Chapters'
+import { Comments } from './collections/Comments'
 import { Favorites } from './collections/Favorites'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
@@ -81,7 +83,9 @@ export default buildConfig({
         },
       ],
     },
+    AITasks,
     Chapters,
+    Comments,
     Favorites,
     Pages,
     Posts,

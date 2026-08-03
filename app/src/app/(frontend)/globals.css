@@ -233,3 +233,37 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+
+/* prefers-color-scheme fallback for dark mode */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) {
+    color-scheme: dark;
+  }
+}
+
+/* Font size CSS variables for reader customization */
+:root {
+  --reader-font-size-sm: 0.875rem;
+  --reader-font-size-base: 1.125rem;
+  --reader-font-size-lg: 1.375rem;
+  --reader-font-size-xl: 1.625rem;
+  --reader-line-height: 1.9;
+}
+
+/* Arabic reader typography — uses CSS variable for font size */
+.reader-content {
+  font-size: var(--reader-font-size-base);
+  line-height: var(--reader-line-height);
+}
+
+.reader-content.font-sm {
+  font-size: var(--reader-font-size-sm);
+}
+
+.reader-content.font-lg {
+  font-size: var(--reader-font-size-lg);
+}
+
+.reader-content.font-xl {
+  font-size: var(--reader-font-size-xl);
+}
