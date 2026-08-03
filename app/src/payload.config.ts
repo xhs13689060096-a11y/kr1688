@@ -6,9 +6,11 @@ import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
 import { Chapters } from './collections/Chapters'
+import { Favorites } from './collections/Favorites'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
+import { ReadingProgress } from './collections/ReadingProgress'
 import { Stories } from './collections/Stories'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
@@ -80,8 +82,10 @@ export default buildConfig({
       ],
     },
     Chapters,
+    Favorites,
     Pages,
     Posts,
+    ReadingProgress,
     Stories,
     Media,
     Categories,
