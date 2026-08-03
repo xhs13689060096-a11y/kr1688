@@ -1,8 +1,5 @@
-export default function HomePage() {
-  return (
-    <main>
-      <h1>KR1688</h1>
-      <p>Saudi-first, Arabic-native Chinese story platform foundation.</p>
-    </main>
-  )
-}
+import PageTemplate, { generateMetadata } from './[slug]/page'
+
+export default PageTemplate
+
+export { generateMetadata }
