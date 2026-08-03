@@ -25,19 +25,100 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
-      name: 'alt',
-      type: 'text',
-      //required: true,
-    },
-    createFolderField({ relationTo: 'folders' }),
-    {
-      name: 'caption',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Details',
+          fields: [
+            {
+              name: 'alt',
+              type: 'text',
+            },
+            createFolderField({ relationTo: 'folders' }),
+            {
+              name: 'caption',
+              type: 'richText',
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
+                },
+              }),
+            },
+          ],
         },
-      }),
+        {
+          label: 'R2 & Rights',
+          fields: [
+            {
+              name: 'altAr',
+              type: 'text',
+              label: 'Arabic Alt Text',
+            },
+            {
+              name: 'mediaType',
+              type: 'select',
+              defaultValue: 'image',
+              options: [
+                { label: 'Cover', value: 'cover' },
+                { label: 'Audio', value: 'audio' },
+                { label: 'Video', value: 'video' },
+                { label: 'EPUB', value: 'epub' },
+                { label: 'Image', value: 'image' },
+              ],
+              label: 'Media Type',
+            },
+            {
+              name: 'rightsStatus',
+              type: 'select',
+              defaultValue: 'unknown',
+              options: [
+                { label: 'Unknown', value: 'unknown' },
+                { label: 'Reviewing', value: 'reviewing' },
+                { label: 'Cleared', value: 'cleared' },
+                { label: 'Restricted', value: 'restricted' },
+                { label: 'Expired', value: 'expired' },
+                { label: 'Rejected', value: 'rejected' },
+              ],
+              label: 'Rights Status',
+            },
+            {
+              name: 'sourceUrl',
+              type: 'text',
+              label: 'Source URL',
+            },
+            {
+              name: 'sourceLabel',
+              type: 'text',
+              label: 'Source Label',
+              admin: {
+                description: 'e.g., Unsplash, Pexels, Custom',
+              },
+            },
+            {
+              name: 'demoOnly',
+              type: 'checkbox',
+              defaultValue: false,
+              label: 'Demo Only',
+              admin: {
+                description: 'Mark this media as demo data, not for production use',
+              },
+            },
+            {
+              name: 'provider',
+              type: 'select',
+              defaultValue: 'local',
+              options: [
+                { label: 'Local', value: 'local' },
+                { label: 'R2', value: 'r2' },
+              ],
+              label: 'Storage Provider',
+              admin: {
+                description: 'Storage provider for this media file',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
   upload: {
