@@ -38,8 +38,8 @@ Acceptance Requested: no
 |---|---|---|---|---|---|
 | T01 | done | 2026-08-03 | 2026-08-03 | passed |  |
 | T02 | done | 2026-08-03 | 2026-08-03 | passed |  |
-| T03 | doing | 2026-08-03 |  | pending |  |
-| T04 | queued |  |  | pending |  |
+| T03 | done | 2026-08-03 | 2026-08-03 | passed |  |
+| T04 | doing | 2026-08-03 |  | pending |  |
 | T05 | queued |  |  | pending |  |
 | T06 | queued |  |  | pending |  |
 | T07 | queued |  |  | pending |  |
