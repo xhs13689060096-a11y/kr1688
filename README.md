@@ -10,23 +10,32 @@ KR1688 is the Saudi-first, Arabic-native story product workspace inside this rep
 
 ## Current build phase
 
-Foundation build only.
+Phase 2A — Official Foundation Replacement + First Content Model Base.
 
-This phase is for:
+Status: **Official Payload website starter imported.** `/kr1688/app` is now a real Payload 4 / Next.js 16 project (not fallback skeleton).
 
-- workspace bootstrap
-- official starter selection
-- project skeleton creation
-- AI-readable internal structure
+Foundation stack:
+- **CMS:** Payload 4 (official website template)
+- **Framework:** Next.js 16 (App Router)
+- **UI:** React 19 + Tailwind CSS 4 + shadcn/ui
+- **Database:** MongoDB (local dev)
+- **Runtime:** Node.js >= 24.15.0, pnpm ^11
+
+This phase delivers:
+- Official starter imported and verified
+- First content model base (stories, chapters, media, users, comments)
+- Arabic-first site settings (RTL default, Saudi-first emphasis)
+- Minimal frontend direction (story-first, no ecommerce framing)
 
 This phase is not for:
 
 - deployment
-- secrets
+- secrets / real database connections
 - payments
 - author ecosystem
 - search/recommendation
 - large AI automation layers
+- merging to main
 
 ## Repository boundary rules
 

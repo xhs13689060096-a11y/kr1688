@@ -1,6 +1,8 @@
-# Payload Website Template
+# KR1688 App — Payload Website Foundation
 
-This is the official [Payload Website Template](https://github.com/payloadcms/payload/blob/main/templates/website). Use it to power websites, blogs, or portfolios from small to enterprise. This repo includes a fully-working backend, enterprise-grade admin panel, and a beautifully designed, production-ready website.
+Saudi-first, Arabic-native story platform foundation. Built on the official [Payload Website Template](https://github.com/payloadcms/payload/blob/main/templates/website).
+
+This app is the KR1688 workspace application layer, isolated under `/kr1688/app`. It replaces the previous fallback skeleton with a real Payload/Next.js project — a fully-working backend, enterprise-grade admin panel, and a production-ready website foundation that will be reshaped around KR1688's story-first content model.
 
 This template is right for you if you are working on:
 
