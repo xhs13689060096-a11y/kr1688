@@ -16,9 +16,9 @@ updated: 2026-08-03
 
 Phase: Phase 2B — Saudi-first Product Base
 Phase Status: active
-Next Single Task: T02
-Current Task ID: T01
-Last Completed Task: none
+Next Single Task: T03
+Current Task ID: T02
+Last Completed Task: T01
 Verification Result: pending
 Blocked Reason: none
 Acceptance Requested: no
