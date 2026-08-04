@@ -16,11 +16,11 @@ updated: 2026-08-04
 
 Phase: Phase 2B Repair-01 — Product Base Acceptance Closure
 Phase Status: repair_in_progress
-Next Single Task: R02
-Current Task ID: R02
-Last Completed Task: R01
-Last Commit: 345de88
-Verification Result: R01 passed
+Next Single Task: R03
+Current Task ID: R03
+Last Completed Task: R02
+Last Commit: b2b6c70
+Verification Result: R02 passed
 Blocked Reason: none
 Acceptance Requested: no
 
@@ -28,9 +28,8 @@ Acceptance Requested: no
 
 - Standalone repository: `https://github.com/xhs13689060096-a11y/kr1688`, branch `main`
 - R01 completed: all five acceptance rejection findings confirmed with file-level evidence
-- R01 also fixed QA report trailing whitespace; `git diff --check` now clean
-- Vault and repo status mirror are synchronized
-- Next: R02 — remove unapproved starter artifacts (sitemap, search, SEO, Posts/Pages routes)
+- R02 completed: sitemap/search/SEO/redirects/formBuilder plugins removed, Posts/Pages de-registered
+- Next: R03 — PostgreSQL adapter, SiteSettings registration, collection consistency
 
 ## Completion Ledger
 
@@ -38,7 +37,8 @@ Acceptance Requested: no
 |---|---|---|---|---|---|
 | T01-T12 | implementation_claimed | 2026-08-03 | 2026-08-03 | acceptance rejected | |
 | R01 | done | 2026-08-04 | 2026-08-04 | passed | PHASE2B_REPAIR_01_REPORT.md |
-| R02 | doing | 2026-08-04 |  | pending | |
+| R02 | done | 2026-08-04 | 2026-08-04 | passed | |
+| R03 | doing | 2026-08-04 |  | pending | |
 | R03 | queued |  |  | pending | |
 | R04 | queued |  |  | pending | |
 | R05 | queued |  |  | pending | |

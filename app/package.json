@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@payloadcms/admin-bar": "workspace:*",
-    "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/live-preview-react": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/plugin-form-builder": "workspace:*",
