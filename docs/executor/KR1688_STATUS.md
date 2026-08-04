@@ -16,10 +16,10 @@ updated: 2026-08-04
 
 Phase: Phase 2B Repair-01 — Product Base Acceptance Closure
 Phase Status: repair_in_progress
-Next Single Task: R03
-Current Task ID: R03
-Last Completed Task: R02
-Last Commit: b2b6c70
+Next Single Task: R04
+Current Task ID: R04
+Last Completed Task: R03
+Last Commit: b5b9884
 Verification Result: R02 passed
 Blocked Reason: none
 Acceptance Requested: no
@@ -28,8 +28,8 @@ Acceptance Requested: no
 
 - Standalone repository: `https://github.com/xhs13689060096-a11y/kr1688`, branch `main`
 - R01 completed: all five acceptance rejection findings confirmed with file-level evidence
-- R02 completed: sitemap/search/SEO/redirects/formBuilder plugins removed, Posts/Pages de-registered
-- Next: R03 — PostgreSQL adapter, SiteSettings registration, collection consistency
+- R03 completed: PostgreSQL adapter active, SiteSettings in globals, 10 collections + 3 globals verified
+- Next: R04 — replace it.todo with executable behavior tests
 
 ## Completion Ledger
 
@@ -38,8 +38,8 @@ Acceptance Requested: no
 | T01-T12 | implementation_claimed | 2026-08-03 | 2026-08-03 | acceptance rejected | |
 | R01 | done | 2026-08-04 | 2026-08-04 | passed | PHASE2B_REPAIR_01_REPORT.md |
 | R02 | done | 2026-08-04 | 2026-08-04 | passed | |
-| R03 | doing | 2026-08-04 |  | pending | |
+| R03 | done | 2026-08-04 |  | pending | |
 | R03 | queued |  |  | pending | |
-| R04 | queued |  |  | pending | |
+| R04 | doing |  |  | pending | |
 | R05 | queued |  |  | pending | |
 | R06 | queued |  |  | pending | |
