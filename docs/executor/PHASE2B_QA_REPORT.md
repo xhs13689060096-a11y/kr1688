@@ -1,8 +1,8 @@
 # KR1688 Phase 2B — Final QA & Acceptance Report
 
-**Generated**: 2026-08-03  
-**Phase**: Phase 2B — Saudi-first Product Base  
-**Repository**: `https://github.com/xhs13689060096-a11y/kr1688` (branch `main`)  
+**Generated**: 2026-08-03
+**Phase**: Phase 2B — Saudi-first Product Base
+**Repository**: `https://github.com/xhs13689060096-a11y/kr1688` (branch `main`)
 **QA Conductor**: Marvis File Agent (T12 executor)
 
 ---
