@@ -33,13 +33,28 @@ async function seed() {
       synopsisAr: {
         root: {
           type: 'root',
+          direction: 'rtl',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
               type: 'paragraph',
+              direction: 'rtl',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 2,
               children: [
                 {
                   type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
                   text: 'في أعماق الصحراء العربية، حيث تلتقي الأساطير بالواقع، تنطلق رحلة شاب يبحث عن الحقيقة وسط وادي تسكنه الذئاب. قصة مشوقة تمزج بين الغموض والمغامرة، وتكشف أسراراً مدفونة منذ قرون.',
+                  version: 1,
                 },
               ],
             },
@@ -49,13 +64,28 @@ async function seed() {
       synopsisZh: {
         root: {
           type: 'root',
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
               type: 'paragraph',
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 2,
               children: [
                 {
                   type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
                   text: '在阿拉伯沙漠深处，传说与现实交织，一个年轻人踏上寻找真相的旅程，穿越狼群栖息的峡谷。这部引人入胜的小说融合了悬疑与冒险，揭开埋藏了几个世纪的秘密。',
+                  version: 1,
                 },
               ],
             },

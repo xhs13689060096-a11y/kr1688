@@ -1,23 +1,21 @@
-/* THIS FILE WAS GENERATED AUTOMATICALLY BY PAYLOAD. */
-/* DO NOT MODIFY IT BECAUSE IT COULD BE REWRITTEN AT ANY TIME. */
+/* Custom Payload admin layout without Google Fonts to work around Next.js 16 Turbopack font bug. */
 import config from '@payload-config'
 import '@payloadcms/next/css'
 import type { ServerFunctionClient } from 'payload'
 import {
   generatePayloadViewport,
   handleServerFunctions,
-  RootLayout,
 } from '@payloadcms/next/layouts'
 import React from 'react'
 
 import { importMap } from './admin/importMap.js'
 import './custom.css'
 
-export const generateViewport = generatePayloadViewport
-
 type Args = {
   children: React.ReactNode
 }
+
+export const generateViewport = generatePayloadViewport
 
 const serverFunction: ServerFunctionClient = async function (args) {
   'use server'
@@ -29,9 +27,13 @@ const serverFunction: ServerFunctionClient = async function (args) {
 }
 
 const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
-  </RootLayout>
+  <html lang="en" suppressHydrationWarning>
+    <head>
+      <meta charSet="utf-8" />
+      <style>{`:root { --font-family-sans: system-ui, -apple-system, sans-serif; --font-family-mono: ui-monospace, monospace; }`}</style>
+    </head>
+    <body>{children}</body>
+  </html>
 )
 
 export default Layout

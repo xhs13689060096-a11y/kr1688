@@ -11,19 +11,7 @@ export const AITasks: CollectionConfig = {
   admin: {
     description:
       'INTERNAL ONLY. AI 输出仅为草稿（isDraftOutput 默认为 true），不能自动发布内容。不连接外部 API。',
-    useAsTitle: (doc: any) => {
-      if (!doc) return ''
-      const type = doc.taskType || 'unknown'
-      const target =
-        doc.target
-          ? typeof doc.target === 'object'
-            ? doc.target.titleAr || doc.target.title || doc.target.id || ''
-            : doc.target
-          : ''
-      const parts = [type]
-      if (target) parts.push(String(target))
-      return parts.join(' — ')
-    },
+    useAsTitle: 'taskType',
     defaultColumns: ['taskType', 'status', 'target', 'model', 'cost', 'updatedAt'],
   },
   access: {

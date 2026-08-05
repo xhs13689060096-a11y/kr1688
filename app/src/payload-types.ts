@@ -62,30 +62,6 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_106E6C8F".
- */
-export type LexicalNodes_106E6C8F =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_106E6C8F>
-  | SerializedHeadingNode<LexicalNodes_106E6C8F, 'h1' | 'h2' | 'h3' | 'h4'>
-  | SerializedAutoLinkNode<LexicalNodes_106E6C8F, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_106E6C8F, LexicalLinkFields>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D0F9AE76".
- */
-export type LexicalNodes_D0F9AE76 =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D0F9AE76>
-  | SerializedHeadingNode<LexicalNodes_D0F9AE76, 'h2' | 'h3' | 'h4'>
-  | SerializedAutoLinkNode<LexicalNodes_D0F9AE76, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D0F9AE76, LexicalLinkFields>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_744BEF80".
  */
 export type LexicalNodes_744BEF80 =
@@ -95,20 +71,6 @@ export type LexicalNodes_744BEF80 =
   | SerializedParagraphNode<LexicalNodes_744BEF80>
   | SerializedAutoLinkNode<LexicalNodes_744BEF80, LexicalLinkFields>
   | SerializedLinkNode<LexicalNodes_744BEF80, LexicalLinkFields>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_658A03C4".
- */
-export type LexicalNodes_658A03C4 =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_658A03C4>
-  | SerializedHorizontalRuleNode
-  | SerializedBlockNode<BannerBlock | CodeBlock | MediaBlock_7426DDFC>
-  | SerializedHeadingNode<LexicalNodes_658A03C4, 'h1' | 'h2' | 'h3' | 'h4'>
-  | SerializedAutoLinkNode<LexicalNodes_658A03C4, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_658A03C4, LexicalLinkFields>;
 
 export interface Config {
   auth: {
@@ -117,17 +79,16 @@ export interface Config {
   blocks: {};
   collections: {
     folders: Folder;
-    pages: Page;
-    posts: Post;
+    'ai-tasks': AiTask;
+    chapters: Chapter;
+    comments: Comment;
+    favorites: Favorite;
+    'reading-progress': ReadingProgress;
+    stories: Story;
     media: Media;
     categories: Category;
     users: User;
-    redirects: Redirect;
-    forms: Form;
-    'form-submissions': FormSubmission;
-    search: Search;
     'payload-kv': PayloadKv;
-    'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -135,46 +96,43 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     folders: FoldersSelect<false> | FoldersSelect<true>;
-    pages: PagesSelect<false> | PagesSelect<true>;
-    posts: PostsSelect<false> | PostsSelect<true>;
+    'ai-tasks': AiTasksSelect<false> | AiTasksSelect<true>;
+    chapters: ChaptersSelect<false> | ChaptersSelect<true>;
+    comments: CommentsSelect<false> | CommentsSelect<true>;
+    favorites: FavoritesSelect<false> | FavoritesSelect<true>;
+    'reading-progress': ReadingProgressSelect<false> | ReadingProgressSelect<true>;
+    stories: StoriesSelect<false> | StoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
-    forms: FormsSelect<false> | FormsSelect<true>;
-    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
-    search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
-    'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
-    tasks: {
-      schedulePublish: TaskSchedulePublish;
-      inline: {
-        input: unknown;
-        output: unknown;
-      };
-    };
+    tasks: unknown;
     workflows: unknown;
   };
 }
@@ -201,8 +159,8 @@ export interface UserAuthOperations {
  * via the `definition` "folders".
  */
 export interface Folder {
-  id: string;
-  _h_folders?: (string | null) | Folder;
+  id: number;
+  _h_folders?: (number | null) | Folder;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -210,105 +168,145 @@ export interface Folder {
   _h_titlePath?: string | null;
 }
 /**
+ * INTERNAL ONLY. AI 输出仅为草稿（isDraftOutput 默认为 true），不能自动发布内容。不连接外部 API。
+ *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
+ * via the `definition` "ai-tasks".
  */
-export interface Page {
-  id: string;
-  title: string;
-  hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_106E6C8F> | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null);
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
-  };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
+export interface AiTask {
+  id: number;
+  taskType:
+    'translation_assist' | 'metadata_generation' | 'comment_moderation' | 'seo_copy_draft' | 'performance_insight';
+  status?: ('queued' | 'processing' | 'draft_complete' | 'approved' | 'rejected' | 'failed') | null;
   /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   * The story or chapter this AI task is targeting.
    */
-  generateSlug?: boolean | null;
-  slug: string;
+  target?:
+    | ({
+        relationTo: 'stories';
+        value: number | Story;
+      } | null)
+    | ({
+        relationTo: 'chapters';
+        value: number | Chapter;
+      } | null);
+  /**
+   * Input parameters for the AI task.
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * AI output — DRAFT ONLY, cannot be used to publish content.
+   */
+  output?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Name of the AI model used.
+   */
+  model?: string | null;
+  /**
+   * Version identifier for the prompt used.
+   */
+  promptVersion?: string | null;
+  /**
+   * Virtual / estimated cost — no real billing.
+   */
+  cost?: number | null;
+  /**
+   * Admin who approved the AI output.
+   */
+  approvedBy?: (number | null) | User;
+  /**
+   * Error message if the task failed.
+   */
+  error?: string | null;
+  /**
+   * AI output is draft only and cannot be used to auto-publish content.
+   */
+  isDraftOutput?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
+ * via the `definition` "stories".
  */
-export interface Post {
-  id: string;
-  title: string;
-  heroImage?: (string | null) | Media;
-  content: LexicalRichText<LexicalNodes_658A03C4>;
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  authors?: (string | User)[] | null;
-  populatedAuthors?:
+export interface Story {
+  id: number;
+  titleAr: string;
+  synopsisAr?: LexicalRichText<LexicalNodes_744BEF80> | null;
+  titleZh?: string | null;
+  synopsisZh?: LexicalRichText<LexicalNodes_744BEF80> | null;
+  slug?: string | null;
+  tags?:
     | {
+        tag?: string | null;
         id?: string | null;
-        name?: string | null;
       }[]
     | null;
+  authorName?: string | null;
   /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   * e.g., فانتازيا, رعب, خيال علمي, رومانسي, تاريخي
    */
-  generateSlug?: boolean | null;
-  slug: string;
+  genre?: string | null;
+  coverImage?: (number | null) | Media;
+  /**
+   * Admin-only field for tracking total chapters
+   */
+  totalChapters?: number | null;
+  contentStatus?: ('draft' | 'review' | 'approved' | 'published' | 'retired') | null;
+  editorialStatus?:
+    ('candidate' | 'briefed' | 'drafting' | 'qa' | 'human-review' | 'approved' | 'released' | 'retired') | null;
+  rightsStatus?: ('unknown' | 'reviewing' | 'cleared' | 'restricted' | 'expired' | 'rejected') | null;
+  riskLevel?: ('none' | 'low' | 'medium' | 'high') | null;
+  riskNotes?: string | null;
+  /**
+   * Mark this story as demo data, not for production use
+   */
+  demoOnly?: boolean | null;
+  publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
-  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt?: string | null;
-  _h_folders?: (string | null) | Folder;
+  _h_folders?: (number | null) | Folder;
   caption?: LexicalRichText<LexicalNodes_744BEF80> | null;
+  altAr?: string | null;
+  mediaType?: ('cover' | 'audio' | 'video' | 'epub' | 'image') | null;
+  rightsStatus?: ('unknown' | 'reviewing' | 'cleared' | 'restricted' | 'expired' | 'rejected') | null;
+  sourceUrl?: string | null;
+  /**
+   * e.g., Unsplash, Pexels, Custom
+   */
+  sourceLabel?: string | null;
+  /**
+   * Mark this media as demo data, not for production use
+   */
+  demoOnly?: boolean | null;
+  /**
+   * Storage provider for this media file
+   */
+  provider?: ('local' | 'r2') | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -381,25 +379,24 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories".
+ * via the `definition` "chapters".
  */
-export interface Category {
-  id: string;
-  title: string;
+export interface Chapter {
+  id: number;
+  titleAr: string;
+  bodyAr?: LexicalRichText<LexicalNodes_744BEF80> | null;
+  titleZh?: string | null;
+  bodyZh?: LexicalRichText<LexicalNodes_744BEF80> | null;
+  slug?: string | null;
+  chapterNumber: number;
+  story: number | Story;
+  wordCount?: number | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  publishedAt?: string | null;
   /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   * Mark this chapter as demo data, not for production use
    */
-  generateSlug?: boolean | null;
-  slug: string;
-  parent?: (string | null) | Category;
-  breadcrumbs?:
-    | {
-        doc?: (string | null) | Category;
-        url?: string | null;
-        label?: string | null;
-        id?: string | null;
-      }[]
-    | null;
+  demoOnly?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -408,7 +405,7 @@ export interface Category {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -431,349 +428,74 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock".
+ * via the `definition` "comments".
  */
-export interface CallToActionBlock {
-  richText?: LexicalRichText<LexicalNodes_106E6C8F> | null;
-  links?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
+export interface Comment {
+  id: number;
+  body: LexicalRichText<LexicalNodes_744BEF80>;
+  author: number | User;
+  story?: (number | null) | Story;
+  chapter?: (number | null) | Chapter;
+  parent?: (number | null) | Comment;
+  status?: ('pending' | 'approved' | 'rejected' | 'hidden') | null;
+  /**
+   * Reason for the moderation decision.
+   */
+  moderationReason?: string | null;
+  /**
+   * Admin-only field.
+   */
+  likeCount?: number | null;
+  /**
+   * Admin-only field.
+   */
+  aiRecommendation?: ('none' | 'approve' | 'reject' | 'flag_review') | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock".
+ * via the `definition` "favorites".
  */
-export interface ContentBlock {
-  columns?:
-    | {
-        size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: LexicalRichText<LexicalNodes_D0F9AE76> | null;
-        enableLink?: boolean | null;
-        link?: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
+export interface Favorite {
+  id: number;
+  user: number | User;
+  story: number | Story;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock".
+ * via the `definition` "reading-progress".
  */
-export interface MediaBlock {
-  media: string | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
+export interface ReadingProgress {
+  id: number;
+  user: number | User;
+  story: number | Story;
+  chapter?: (number | null) | Chapter;
+  /**
+   * Reading progress as a percentage (0–100)
+   */
+  progressPercentage?: number | null;
+  lastReadAt?: string | null;
+  completed?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock".
+ * via the `definition` "categories".
  */
-export interface ArchiveBlock {
-  introContent?: LexicalRichText<LexicalNodes_106E6C8F> | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
-  categories?: (string | Category)[] | null;
-  limit?: number | null;
-  selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string | Post;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  form: string | Form;
-  enableIntro?: boolean | null;
-  introContent?: LexicalRichText<LexicalNodes_106E6C8F> | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'formBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
-  id: string;
+export interface Category {
+  id: number;
   title: string;
-  fields?: (Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea)[] | null;
-  submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
-  confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_106E6C8F>;
-  redirect?: {
-    url: string;
-  };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
-  emails?:
+  slug: string;
+  parent?: (number | null) | Category;
+  breadcrumbs?:
     | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
-        message?: LexicalRichText<LexicalNodes_744BEF80> | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Checkbox".
- */
-export interface Checkbox {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  defaultValue?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'checkbox';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Country".
- */
-export interface Country {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'country';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Email".
- */
-export interface Email {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'email';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Message".
- */
-export interface Message {
-  message?: LexicalRichText<LexicalNodes_744BEF80> | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'message';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Number".
- */
-export interface Number {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'number';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Select".
- */
-export interface Select {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: string | null;
-  placeholder?: string | null;
-  options?:
-    | {
-        label: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'select';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "State".
- */
-export interface State {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'state';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Text".
- */
-export interface Text {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: string | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'text';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "Textarea".
- */
-export interface Textarea {
-  name: string;
-  label?: string | null;
-  width?: number | null;
-  defaultValue?: string | null;
-  required?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'textarea';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
- */
-export interface Redirect {
-  id: string;
-  /**
-   * You will need to rebuild the website when changing this field.
-   */
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: string | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: string | Post;
-        } | null);
-    url?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-submissions".
- */
-export interface FormSubmission {
-  id: string;
-  form: string | Form;
-  submissionData?:
-    | {
-        field: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This is a collection of automatically created search results. These results are used by the global site search and will be updated automatically as documents in the CMS are created or updated.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search".
- */
-export interface Search {
-  id: string;
-  title?: string | null;
-  priority?: number | null;
-  doc: {
-    relationTo: 'posts';
-    value: string | Post;
-  };
-  slug?: string | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: (string | null) | Media;
-  };
-  categories?:
-    | {
-        relationTo?: string | null;
-        categoryID?: string | null;
-        title?: string | null;
+        doc?: (number | null) | Category;
+        url?: string | null;
+        label?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -785,7 +507,7 @@ export interface Search {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -799,147 +521,55 @@ export interface PayloadKv {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs".
- */
-export interface PayloadJob {
-  id: string;
-  /**
-   * Input data provided to the job
-   */
-  input?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  taskStatus?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  completedAt?: string | null;
-  totalTried?: number | null;
-  /**
-   * If hasError is true this job will not be retried
-   */
-  hasError?: boolean | null;
-  /**
-   * If hasError is true, this is the error that caused it
-   */
-  error?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Task execution log
-   */
-  log?:
-    | {
-        executedAt: string;
-        completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
-        taskID: string;
-        input?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        output?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        state: 'failed' | 'succeeded';
-        error?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
-  queue?: string | null;
-  waitUntil?: string | null;
-  processing?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'folders';
-        value: string | Folder;
+        value: number | Folder;
       } | null)
     | ({
-        relationTo: 'pages';
-        value: string | Page;
+        relationTo: 'ai-tasks';
+        value: number | AiTask;
       } | null)
     | ({
-        relationTo: 'posts';
-        value: string | Post;
+        relationTo: 'chapters';
+        value: number | Chapter;
+      } | null)
+    | ({
+        relationTo: 'comments';
+        value: number | Comment;
+      } | null)
+    | ({
+        relationTo: 'favorites';
+        value: number | Favorite;
+      } | null)
+    | ({
+        relationTo: 'reading-progress';
+        value: number | ReadingProgress;
+      } | null)
+    | ({
+        relationTo: 'stories';
+        value: number | Story;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
-      } | null)
-    | ({
-        relationTo: 'redirects';
-        value: string | Redirect;
-      } | null)
-    | ({
-        relationTo: 'forms';
-        value: string | Form;
-      } | null)
-    | ({
-        relationTo: 'form-submissions';
-        value: string | FormSubmission;
-      } | null)
-    | ({
-        relationTo: 'search';
-        value: string | Search;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -949,10 +579,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -972,7 +602,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -992,169 +622,112 @@ export interface FoldersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_select".
+ * via the `definition` "ai-tasks_select".
  */
-export interface PagesSelect<T extends boolean = true> {
-  title?: T;
-  hero?:
-    | T
-    | {
-        type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
-      };
-  layout?:
-    | T
-    | {
-        cta?: T | CallToActionBlockSelect<T>;
-        content?: T | ContentBlockSelect<T>;
-        mediaBlock?: T | MediaBlockSelect<T>;
-        archive?: T | ArchiveBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
-      };
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-      };
-  publishedAt?: T;
-  generateSlug?: T;
-  slug?: T;
+export interface AiTasksSelect<T extends boolean = true> {
+  taskType?: T;
+  status?: T;
+  target?: T;
+  input?: T;
+  output?: T;
+  model?: T;
+  promptVersion?: T;
+  cost?: T;
+  approvedBy?: T;
+  error?: T;
+  isDraftOutput?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock_select".
+ * via the `definition` "chapters_select".
  */
-export interface CallToActionBlockSelect<T extends boolean = true> {
-  richText?: T;
-  links?:
-    | T
-    | {
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-              appearance?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentBlock_select".
- */
-export interface ContentBlockSelect<T extends boolean = true> {
-  columns?:
-    | T
-    | {
-        size?: T;
-        richText?: T;
-        enableLink?: T;
-        link?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-              appearance?: T;
-            };
-        id?: T;
-      };
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock_select".
- */
-export interface MediaBlockSelect<T extends boolean = true> {
-  media?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock_select".
- */
-export interface ArchiveBlockSelect<T extends boolean = true> {
-  introContent?: T;
-  populateBy?: T;
-  relationTo?: T;
-  categories?: T;
-  limit?: T;
-  selectedDocs?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock_select".
- */
-export interface FormBlockSelect<T extends boolean = true> {
-  form?: T;
-  enableIntro?: T;
-  introContent?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_select".
- */
-export interface PostsSelect<T extends boolean = true> {
-  title?: T;
-  heroImage?: T;
-  content?: T;
-  relatedPosts?: T;
-  categories?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        image?: T;
-        description?: T;
-      };
-  publishedAt?: T;
-  authors?: T;
-  populatedAuthors?:
-    | T
-    | {
-        id?: T;
-        name?: T;
-      };
-  generateSlug?: T;
+export interface ChaptersSelect<T extends boolean = true> {
+  titleAr?: T;
+  bodyAr?: T;
+  titleZh?: T;
+  bodyZh?: T;
   slug?: T;
+  chapterNumber?: T;
+  story?: T;
+  wordCount?: T;
+  status?: T;
+  publishedAt?: T;
+  demoOnly?: T;
   updatedAt?: T;
   createdAt?: T;
-  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "comments_select".
+ */
+export interface CommentsSelect<T extends boolean = true> {
+  body?: T;
+  author?: T;
+  story?: T;
+  chapter?: T;
+  parent?: T;
+  status?: T;
+  moderationReason?: T;
+  likeCount?: T;
+  aiRecommendation?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "favorites_select".
+ */
+export interface FavoritesSelect<T extends boolean = true> {
+  user?: T;
+  story?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reading-progress_select".
+ */
+export interface ReadingProgressSelect<T extends boolean = true> {
+  user?: T;
+  story?: T;
+  chapter?: T;
+  progressPercentage?: T;
+  lastReadAt?: T;
+  completed?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stories_select".
+ */
+export interface StoriesSelect<T extends boolean = true> {
+  titleAr?: T;
+  synopsisAr?: T;
+  titleZh?: T;
+  synopsisZh?: T;
+  slug?: T;
+  tags?:
+    | T
+    | {
+        tag?: T;
+        id?: T;
+      };
+  authorName?: T;
+  genre?: T;
+  coverImage?: T;
+  totalChapters?: T;
+  contentStatus?: T;
+  editorialStatus?: T;
+  rightsStatus?: T;
+  riskLevel?: T;
+  riskNotes?: T;
+  demoOnly?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1164,6 +737,13 @@ export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   _h_folders?: T;
   caption?: T;
+  altAr?: T;
+  mediaType?: T;
+  rightsStatus?: T;
+  sourceUrl?: T;
+  sourceLabel?: T;
+  demoOnly?: T;
+  provider?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1256,7 +836,6 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
-  generateSlug?: T;
   slug?: T;
   parent?: T;
   breadcrumbs?:
@@ -1295,234 +874,11 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects_select".
- */
-export interface RedirectsSelect<T extends boolean = true> {
-  from?: T;
-  to?:
-    | T
-    | {
-        type?: T;
-        reference?: T;
-        url?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms_select".
- */
-export interface FormsSelect<T extends boolean = true> {
-  title?: T;
-  fields?:
-    | T
-    | {
-        checkbox?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              defaultValue?: T;
-              id?: T;
-              blockName?: T;
-            };
-        country?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        email?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        message?:
-          | T
-          | {
-              message?: T;
-              id?: T;
-              blockName?: T;
-            };
-        number?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        select?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              placeholder?: T;
-              options?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        state?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        text?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        textarea?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  submitButtonLabel?: T;
-  confirmationType?: T;
-  confirmationMessage?: T;
-  redirect?:
-    | T
-    | {
-        url?: T;
-      };
-  emails?:
-    | T
-    | {
-        emailTo?: T;
-        cc?: T;
-        bcc?: T;
-        replyTo?: T;
-        emailFrom?: T;
-        subject?: T;
-        message?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-submissions_select".
- */
-export interface FormSubmissionsSelect<T extends boolean = true> {
-  form?: T;
-  submissionData?:
-    | T
-    | {
-        field?: T;
-        value?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "search_select".
- */
-export interface SearchSelect<T extends boolean = true> {
-  title?: T;
-  priority?: T;
-  doc?: T;
-  slug?: T;
-  meta?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        image?: T;
-      };
-  categories?:
-    | T
-    | {
-        relationTo?: T;
-        categoryID?: T;
-        title?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs_select".
- */
-export interface PayloadJobsSelect<T extends boolean = true> {
-  input?: T;
-  taskStatus?: T;
-  completedAt?: T;
-  totalTried?: T;
-  hasError?: T;
-  error?: T;
-  log?:
-    | T
-    | {
-        executedAt?: T;
-        completedAt?: T;
-        taskSlug?: T;
-        taskID?: T;
-        input?: T;
-        output?: T;
-        state?: T;
-        error?: T;
-        id?: T;
-      };
-  taskSlug?: T;
-  queue?: T;
-  waitUntil?: T;
-  processing?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1561,21 +917,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
+  id: number;
   navItems?:
     | {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
+          reference?: {
+            relationTo: 'stories';
+            value: number | Story;
+          } | null;
           url?: string | null;
           label: string;
         };
@@ -1590,27 +941,38 @@ export interface Header {
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: string;
+  id: number;
   navItems?:
     | {
         link: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
+          reference?: {
+            relationTo: 'stories';
+            value: number | Story;
+          } | null;
           url?: string | null;
           label: string;
         };
         id?: string | null;
       }[]
     | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  siteName: string;
+  siteDescription: string;
+  /**
+   * ISO 639-1 language code
+   */
+  defaultLocale: string;
+  defaultDirection: 'rtl' | 'ltr';
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1662,6 +1024,19 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  siteDescription?: T;
+  defaultLocale?: T;
+  defaultDirection?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -1672,59 +1047,59 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TaskSchedulePublish".
+ * via the `definition` "collection-query_widget".
  */
-export interface TaskSchedulePublish {
-  input: {
-    type?: ('publish' | 'unpublish') | null;
-    locale?: string | null;
-    doc?:
-      | ({
-          relationTo: 'pages';
-          value: string | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: string | Post;
-        } | null);
-    global?: string | null;
-    user?: (string | null) | User;
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'folders'
+      | 'ai-tasks'
+      | 'chapters'
+      | 'comments'
+      | 'favorites'
+      | 'reading-progress'
+      | 'stories'
+      | 'media'
+      | 'categories'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
   };
-  output?: unknown;
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerBlock".
+ * via the `definition` "activity_widget".
  */
-export interface BannerBlock {
-  id: string;
-  blockType: 'banner';
-  style: 'info' | 'warning' | 'error' | 'success';
-  content: LexicalRichText<LexicalNodes_744BEF80>;
-  blockName?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CodeBlock".
- */
-export interface CodeBlock {
-  id: string;
-  blockType: 'code';
-  language?: ('typescript' | 'javascript' | 'css') | null;
-  code: string;
-  blockName?: string | null;
-}
-/**
- * Multiple blocks resolve to the `MediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlock_7426DDFC".
- */
-export interface MediaBlock_7426DDFC {
-  id: string;
-  blockType: 'mediaBlock';
-  media: string | Media;
-  blockName?: string | null;
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'folders'
+          | 'ai-tasks'
+          | 'chapters'
+          | 'comments'
+          | 'favorites'
+          | 'reading-progress'
+          | 'stories'
+          | 'media'
+          | 'categories'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1781,14 +1156,6 @@ export interface SerializedParagraphNode<TChildren> extends SerializedLexicalEle
   textStyle: string;
 }
 
-export interface SerializedHeadingNode<
-  TChildren,
-  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
-> extends SerializedLexicalElementBase<TChildren> {
-  type: 'heading';
-  tag: TTag;
-}
-
 export interface LexicalLinkFields {
   [k: string]: unknown;
   doc?: {
@@ -1820,23 +1187,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export interface SerializedHorizontalRuleNode {
-  type: 'horizontalrule';
-  version: number;
-}
-
-export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
-  type: 'block';
-  format: LexicalElementFormat;
-  version: number;
-  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-} : never;
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
-  type: 'inlineBlock';
-  version: number;
-  fields: { id: string } & Omit<TFields, 'id'>;
-} : never;
 
 
 declare module 'payload' {

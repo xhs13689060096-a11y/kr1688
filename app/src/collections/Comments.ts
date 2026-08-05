@@ -24,27 +24,7 @@ export const Comments: CollectionConfig = {
     delete: authenticated,
   },
   admin: {
-    useAsTitle: (doc: any) => {
-      if (doc?.body) {
-        try {
-          const body =
-            typeof doc.body === 'string' ? JSON.parse(doc.body) : doc.body
-          if (body?.root?.children) {
-            const text = body.root.children
-              .map(
-                (p: any) =>
-                  p.children?.map((c: any) => c.text || '').join('') || '',
-              )
-              .join(' ')
-              .trim()
-            if (text) return text.substring(0, 50)
-          }
-        } catch {
-          // Fall through to id
-        }
-      }
-      return doc?.id ?? ''
-    },
+    useAsTitle: 'body',
     defaultColumns: ['body', 'author', 'story', 'chapter', 'status', 'createdAt'],
   },
   fields: [

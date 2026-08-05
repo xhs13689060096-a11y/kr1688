@@ -59,7 +59,7 @@ export const Favorites: CollectionConfig = {
             // On update: fail if another record (different ID) exists
             if (existing.totalDocs > 0) {
               const duplicate = existing.docs.some(
-                (doc) => !data.id || doc.id !== data.id,
+                                (doc) => !data?.id || doc.id !== data.id,
               )
               if (duplicate || operation === 'create') {
                 throw new Error(

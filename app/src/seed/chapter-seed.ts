@@ -56,13 +56,28 @@ async function seed() {
       bodyAr: {
         root: {
           type: 'root',
+          direction: 'rtl',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
               type: 'paragraph',
+              direction: 'rtl',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 2,
               children: [
                 {
                   type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
                   text: 'كانت الشمس تغرب خلف الكثبان الرملية الذهبية، تاركةً وراءها سماءً ملتهبة بألوان الأرجوان والبرتقال. وقف سامر على حافة الوادي، يتأمل المشهد الذي طالما حلم به. كان الهواء جافاً، يحمل معه رائحة الرمال القديمة وعطر النباتات الصحراوية النادرة.',
+                  version: 1,
                 },
               ],
             },
@@ -72,13 +87,28 @@ async function seed() {
       bodyZh: {
         root: {
           type: 'root',
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
               type: 'paragraph',
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 2,
               children: [
                 {
                   type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
                   text: '太阳缓缓沉落在金色沙丘之后，天空被染成了紫橙交织的颜色。萨米尔站在峡谷边缘，凝望着这片他梦寐已久的土地。干燥的风吹过，带着远古沙粒的气息和稀有沙漠植物的芬芳。',
+                  version: 1,
                 },
               ],
             },
@@ -105,13 +135,28 @@ async function seed() {
       bodyAr: {
         root: {
           type: 'root',
+          direction: 'rtl',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
               type: 'paragraph',
+              direction: 'rtl',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 2,
               children: [
                 {
                   type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
                   text: 'في صباح اليوم التالي، استيقظ سامر على صوت عواء الذئاب البعيد. كان الصوت يحمل نغمة غريبة، وكأنه نداء قديم من أعماق الزمن. نهض بسرعة، وجمع أدواته القليلة، وبدأ في النزول إلى عمق الوادي. كانت الصخور تحيط به من كل جانب، منحوتة بأشكال عجيبة كأنها حكايات محفورة في الحجر.',
+                  version: 1,
                 },
               ],
             },
@@ -121,13 +166,28 @@ async function seed() {
       bodyZh: {
         root: {
           type: 'root',
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
           children: [
             {
               type: 'paragraph',
+              direction: 'ltr',
+              format: '',
+              indent: 0,
+              textFormat: 0,
+              textStyle: '',
+              version: 2,
               children: [
                 {
                   type: 'text',
+                  detail: 0,
+                  format: 0,
+                  mode: 'normal',
+                  style: '',
                   text: '第二天清晨，萨米尔被远处狼嚎声唤醒。那声音带着奇特的调子，仿佛来自时间深处的呼唤。他迅速起身，收拾好为数不多的工具，开始向峡谷深处走去。四周的岩石形态奇异，仿佛铭刻在石头上的古老故事。',
+                  version: 1,
                 },
               ],
             },

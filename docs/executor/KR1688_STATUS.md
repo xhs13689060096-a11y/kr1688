@@ -16,10 +16,10 @@ updated: 2026-08-04
 
 Phase: Phase 2B Repair-01 — Product Base Acceptance Closure
 Phase Status: repair_in_progress
-Next Single Task: R04
-Current Task ID: R04
-Last Completed Task: R03
-Last Commit: b5b9884
+Next Single Task: R05
+Current Task ID: R05
+Last Completed Task: R04
+Last Commit: 0a5470f (local, push pending)
 Verification Result: R02 passed
 Blocked Reason: none
 Acceptance Requested: no
@@ -28,8 +28,8 @@ Acceptance Requested: no
 
 - Standalone repository: `https://github.com/xhs13689060096-a11y/kr1688`, branch `main`
 - R01 completed: all five acceptance rejection findings confirmed with file-level evidence
-- R03 completed: PostgreSQL adapter active, SiteSettings in globals, 10 collections + 3 globals verified
-- Next: R04 — replace it.todo with executable behavior tests
+- R04 completed: 22 executable behavior tests, zero it.todo remnants
+- Next: R05 — install, typecheck, lint, build, test with real evidence
 
 ## Completion Ledger
 
@@ -40,6 +40,6 @@ Acceptance Requested: no
 | R02 | done | 2026-08-04 | 2026-08-04 | passed | |
 | R03 | done | 2026-08-04 |  | pending | |
 | R03 | queued |  |  | pending | |
-| R04 | doing |  |  | pending | |
-| R05 | queued |  |  | pending | |
+| R04 | done |  |  | pending | |
+| R05 | doing |  |  | pending | |
 | R06 | queued |  |  | pending | |
