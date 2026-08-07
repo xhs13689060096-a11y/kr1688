@@ -5,16 +5,8 @@ const defaultLabels = {
   singular: 'Doc',
 }
 
-const defaultCollectionLabels = {
-  posts: {
-    plural: 'Posts',
-    singular: 'Post',
-  },
-}
-
 export const PageRange: React.FC<{
   className?: string
-  collection?: keyof typeof defaultCollectionLabels
   collectionLabels?: {
     plural?: string
     singular?: string
@@ -25,7 +17,6 @@ export const PageRange: React.FC<{
 }> = (props) => {
   const {
     className,
-    collection,
     collectionLabels: collectionLabelsFromProps,
     currentPage,
     limit,
@@ -39,17 +30,14 @@ export const PageRange: React.FC<{
   if (totalDocs && indexEnd > totalDocs) indexEnd = totalDocs
 
   const { plural, singular } =
-    collectionLabelsFromProps ||
-    (collection ? defaultCollectionLabels[collection] : undefined) ||
-    defaultLabels ||
-    {}
+    collectionLabelsFromProps || defaultLabels || {}
 
   return (
     <div className={[className, 'font-semibold'].filter(Boolean).join(' ')}>
-      {(typeof totalDocs === 'undefined' || totalDocs === 0) && 'Search produced no results.'}
+      {(typeof totalDocs === 'undefined' || totalDocs === 0) && 'لا توجد نتائج'}
       {typeof totalDocs !== 'undefined' &&
         totalDocs > 0 &&
-        `Showing ${indexStart}${indexStart > 0 ? ` - ${indexEnd}` : ''} of ${totalDocs} ${
+        `عرض ${indexStart}${indexStart > 0 ? ` - ${indexEnd}` : ''} من ${totalDocs} ${
           totalDocs > 1 ? plural : singular
         }`}
     </div>

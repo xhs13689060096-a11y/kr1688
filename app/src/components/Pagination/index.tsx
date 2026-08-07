@@ -13,18 +13,21 @@ import { useRouter } from 'next/navigation'
 import React from 'react'
 
 export const Pagination: React.FC<{
+  baseRoute?: string
   className?: string
   page: number
   totalPages: number
 }> = (props) => {
   const router = useRouter()
 
-  const { className, page, totalPages } = props
+  const { baseRoute = '/stories', className, page, totalPages } = props
   const hasNextPage = page < totalPages
   const hasPrevPage = page > 1
 
   const hasExtraPrevPages = page - 1 > 1
   const hasExtraNextPages = page + 1 < totalPages
+
+  const pageUrl = (p: number) => `${baseRoute}/page/${p}`
 
   return (
     <div className={cn('my-12', className)}>
@@ -34,7 +37,7 @@ export const Pagination: React.FC<{
             <PaginationPrevious
               disabled={!hasPrevPage}
               onClick={() => {
-                router.push(`/posts/page/${page - 1}`)
+                router.push(pageUrl(page - 1))
               }}
             />
           </PaginationItem>
@@ -49,7 +52,7 @@ export const Pagination: React.FC<{
             <PaginationItem>
               <PaginationLink
                 onClick={() => {
-                  router.push(`/posts/page/${page - 1}`)
+                  router.push(pageUrl(page - 1))
                 }}
               >
                 {page - 1}
@@ -61,7 +64,7 @@ export const Pagination: React.FC<{
             <PaginationLink
               isActive
               onClick={() => {
-                router.push(`/posts/page/${page}`)
+                router.push(pageUrl(page))
               }}
             >
               {page}
@@ -72,7 +75,7 @@ export const Pagination: React.FC<{
             <PaginationItem>
               <PaginationLink
                 onClick={() => {
-                  router.push(`/posts/page/${page + 1}`)
+                  router.push(pageUrl(page + 1))
                 }}
               >
                 {page + 1}
@@ -90,7 +93,7 @@ export const Pagination: React.FC<{
             <PaginationNext
               disabled={!hasNextPage}
               onClick={() => {
-                router.push(`/posts/page/${page + 1}`)
+                router.push(pageUrl(page + 1))
               }}
             />
           </PaginationItem>
