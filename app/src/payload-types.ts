@@ -443,13 +443,7 @@ export interface Comment {
    * Reason for the moderation decision.
    */
   moderationReason?: string | null;
-  /**
-   * Admin-only field.
-   */
   likeCount?: number | null;
-  /**
-   * Admin-only field.
-   */
   aiRecommendation?: ('none' | 'approve' | 'reject' | 'flag_review') | null;
   updatedAt: string;
   createdAt: string;

@@ -1,6 +1,19 @@
 import type { CollectionConfig } from 'payload'
 
+import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+
+/**
+ * S04 — Secured Comments collection.
+ *
+ * - Author always derived from req.user.id (anti-spoofing).
+ * - Reader creates pending, only mutates own body.
+ * - Only admin controls status, moderationReason, likeCount, aiRecommendation.
+ * - Public (unauthenticated) sees only approved comments.
+ * - Authenticated reader sees approved + their own.
+ * - Admin sees all.
+ * - Single-level replies only (no nested replies beyond depth 1).
+ */
 
 export const Comments: CollectionConfig = {
   slug: 'comments',
@@ -11,17 +24,32 @@ export const Comments: CollectionConfig = {
   access: {
     create: authenticated,
     read: ({ req: { user } }) => {
-      // Unauthenticated users can only see approved comments.
-      // Authenticated users (admin in V1) can see all.
-      if (user) return true
+      if (!user) {
+        // Public: only approved comments
+        return { status: { equals: 'approved' } }
+      }
+      if (user.role === 'admin') {
+        // Admin: all comments
+        return true
+      }
+      // Reader: approved OR own
       return {
-        status: {
-          equals: 'approved',
-        },
+        or: [
+          { status: { equals: 'approved' } },
+          { author: { equals: user.id } },
+        ],
       }
     },
-    update: authenticated,
-    delete: authenticated,
+    update: ({ req: { user } }) => {
+      if (!user) return false
+      if (user.role === 'admin') return true
+      // Reader: only own comments
+      return { author: { equals: user.id } }
+    },
+    delete: ({ req: { user } }) => {
+      if (!user) return false
+      return Boolean(user.role === 'admin')
+    },
   },
   admin: {
     useAsTitle: 'body',
@@ -33,6 +61,10 @@ export const Comments: CollectionConfig = {
       type: 'richText',
       required: true,
       label: 'Comment Body',
+      access: {
+        read: anyone,
+        update: ({ req: { user } }) => Boolean(user),
+      },
     },
     {
       name: 'author',
@@ -41,6 +73,10 @@ export const Comments: CollectionConfig = {
       required: true,
       hasMany: false,
       label: 'Author',
+      access: {
+        create: () => false,
+        update: () => false,
+      },
     },
     {
       name: 'story',
@@ -74,11 +110,21 @@ export const Comments: CollectionConfig = {
       ],
       defaultValue: 'pending',
       label: 'Status',
+      access: {
+        create: () => false,
+        read: anyone,
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
     },
     {
       name: 'moderationReason',
       type: 'textarea',
       label: 'Moderation Reason',
+      access: {
+        create: () => false,
+        read: anyone,
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
       admin: {
         description: 'Reason for the moderation decision.',
       },
@@ -89,8 +135,12 @@ export const Comments: CollectionConfig = {
       defaultValue: 0,
       min: 0,
       label: 'Like Count',
+      access: {
+        create: () => false,
+        read: anyone,
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
       admin: {
-        description: 'Admin-only field.',
         readOnly: true,
       },
     },
@@ -105,28 +155,50 @@ export const Comments: CollectionConfig = {
       ],
       defaultValue: 'none',
       label: 'AI Recommendation',
+      access: {
+        create: () => false,
+        read: anyone,
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
       admin: {
-        description: 'Admin-only field.',
         readOnly: true,
       },
     },
   ],
   hooks: {
     beforeValidate: [
-      ({ data }) => {
-        // Ensure at least one of story or chapter is provided.
-        if (!data?.story && !data?.chapter) {
-          throw new Error(
-            'A comment must be associated with either a story or a chapter.',
-          )
+      ({ req, data, operation }) => {
+        // S04: Always derive author from req.user — reject spoofing
+        if (!req.user) {
+          throw new Error('Authentication required to create or update a comment.')
         }
-      },
-    ],
-    beforeChange: [
-      ({ data, req }) => {
-        // Auto-populate author from the authenticated user on create.
-        if (!data?.author && req?.user) {
-          data.author = req.user.id
+        data.author = req.user.id
+
+        // S04: Reader always creates pending; cannot change status
+        if (req.user.role !== 'admin') {
+          data.status = 'pending'
+          // Strip admin-only fields if reader tries to set them
+          delete data.likeCount
+          delete data.aiRecommendation
+          delete data.moderationReason
+        }
+
+        // Validate story OR chapter
+        if (operation === 'create') {
+          if (!data?.story && !data?.chapter) {
+            throw new Error(
+              'A comment must be associated with either a story or a chapter.',
+            )
+          }
+        }
+
+        // Single-level reply validation
+        if (data?.parent) {
+          if (data?.chapter) {
+            throw new Error(
+              'A reply comment cannot be associated with a chapter. Use the parent comment context.',
+            )
+          }
         }
       },
     ],
