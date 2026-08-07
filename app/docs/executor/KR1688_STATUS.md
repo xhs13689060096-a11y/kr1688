@@ -21,7 +21,7 @@ tags: [kr1688, marvis, status, phase-2b, repair-02, repository-mirror]
 
 Phase: Phase 2B Repair-02 — Security, Test Truth, and Acceptance Closure
 Phase Status: repair_in_progress
-Next Single Task: S03
+Next Single Task: S04
 Current Task ID: S03
 Last Completed Task: S01 baseline evidence (42fa6a3), S02 ESLint fix (18b4ed3)
 Last Commit: 18b4ed3

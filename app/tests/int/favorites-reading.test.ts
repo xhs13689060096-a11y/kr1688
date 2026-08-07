@@ -170,6 +170,368 @@ describe('Favorites', () => {
 })
 
 // ---------------------------------------------------------------------------
+// S03 — Security: reader identity, role enforcement, spoofing protection
+// ---------------------------------------------------------------------------
+
+describe('S03 — User roles and registration', () => {
+  beforeAll(async () => {
+    const payloadConfig = await config
+    payload = await getPayload({ config: payloadConfig })
+  })
+
+  it('public registration creates reader role by default', async () => {
+    const ts = Date.now()
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: `reader-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Reader ${ts}`,
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    expect(user).toBeDefined()
+    expect(user.role).toBe('reader')
+  })
+
+  it('reader cannot self-promote to admin via update', async () => {
+    const ts = Date.now()
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: `nopromote-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `NoPromote ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const updated = await payload.update({
+      collection: 'users',
+      id: user.id,
+      data: { role: 'admin' },
+      overrideAccess: false,
+      req: { user },
+    })
+
+    expect(updated.role).toBe('reader')
+  })
+
+  it('admin can promote a reader to admin', async () => {
+    const ts = Date.now()
+    const adminUser = await payload.create({
+      collection: 'users',
+      data: {
+        email: `admin-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Admin ${ts}`,
+        role: 'admin',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const reader = await payload.create({
+      collection: 'users',
+      data: {
+        email: `promotable-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Promotable ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const promoted = await payload.update({
+      collection: 'users',
+      id: reader.id,
+      data: { role: 'admin' },
+      overrideAccess: false,
+      req: { user: adminUser },
+    })
+
+    expect(promoted.role).toBe('admin')
+  })
+
+  it('reader cannot read another user profile', async () => {
+    const ts = Date.now()
+    const userA = await payload.create({
+      collection: 'users',
+      data: {
+        email: `selfonly-a-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `SelfOnly A ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const userB = await payload.create({
+      collection: 'users',
+      data: {
+        email: `selfonly-b-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `SelfOnly B ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    try {
+      await payload.findByID({
+        collection: 'users',
+        id: userA.id,
+        overrideAccess: false,
+        req: { user: userB },
+      })
+      expect.unreachable('Reader should not be able to read another user')
+    } catch (error: any) {
+      expect(error).toBeDefined()
+      expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
+    }
+  })
+
+  it('reader can read their own profile', async () => {
+    const ts = Date.now()
+    const user = await payload.create({
+      collection: 'users',
+      data: {
+        email: `selfread-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `SelfRead ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const result = await payload.findByID({
+      collection: 'users',
+      id: user.id,
+      overrideAccess: false,
+      req: { user },
+    })
+
+    expect(result).toBeDefined()
+    expect(result.id).toBe(user.id)
+  })
+
+  it('admin can read any user', async () => {
+    const ts = Date.now()
+    const admin = await payload.create({
+      collection: 'users',
+      data: {
+        email: `adminsee-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `AdminSee ${ts}`,
+        role: 'admin',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const reader = await payload.create({
+      collection: 'users',
+      data: {
+        email: `seen-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Seen ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const result = await payload.findByID({
+      collection: 'users',
+      id: reader.id,
+      overrideAccess: false,
+      req: { user: admin },
+    })
+
+    expect(result).toBeDefined()
+    expect(result.id).toBe(reader.id)
+  })
+})
+
+describe('S03 — Favorites spoofing protection', () => {
+  beforeAll(async () => {
+    const payloadConfig = await config
+    payload = await getPayload({ config: payloadConfig })
+  })
+
+  it('favorite creation ignores spoofed user ID, uses req.user.id', async () => {
+    const ts = Date.now()
+    const realUser = await payload.create({
+      collection: 'users',
+      data: {
+        email: `spooffav-real-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Real ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const otherUser = await payload.create({
+      collection: 'users',
+      data: {
+        email: `spooffav-other-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Other ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const story = await payload.create({
+      collection: 'stories',
+      data: {
+        titleAr: `قصة اختبار ${ts}`,
+        demoOnly: true,
+        contentStatus: 'draft',
+      },
+      overrideAccess: true,
+    })
+
+    const favorite = await payload.create({
+      collection: 'favorites',
+      data: {
+        user: otherUser.id,
+        story: story.id,
+      },
+      overrideAccess: false,
+      req: { user: realUser },
+    })
+
+    expect(favorite).toBeDefined()
+    expect(favorite.user).toBe(realUser.id)
+    expect(favorite.user).not.toBe(otherUser.id)
+  })
+
+  it('favorite query only returns own records for reader', async () => {
+    const ts = Date.now()
+    const userA = await payload.create({
+      collection: 'users',
+      data: {
+        email: `favq-a-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `FavQ A ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const userB = await payload.create({
+      collection: 'users',
+      data: {
+        email: `favq-b-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `FavQ B ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const story1 = await payload.create({
+      collection: 'stories',
+      data: { titleAr: `قصة 1 ${ts}`, demoOnly: true, contentStatus: 'draft' },
+      overrideAccess: true,
+    })
+
+    await payload.create({
+      collection: 'favorites',
+      data: { story: story1.id },
+      overrideAccess: false,
+      req: { user: userA },
+    })
+
+    const result = await payload.find({
+      collection: 'favorites',
+      overrideAccess: false,
+      req: { user: userB },
+    })
+
+    const hasA = result.docs.some(
+      (doc: any) => typeof doc.user === 'string'
+        ? doc.user === userA.id
+        : doc.user?.id === userA.id,
+    )
+    expect(hasA).toBe(false)
+  })
+})
+
+describe('S03 — ReadingProgress spoofing protection', () => {
+  beforeAll(async () => {
+    const payloadConfig = await config
+    payload = await getPayload({ config: payloadConfig })
+  })
+
+  it('reading progress creation ignores spoofed user ID', async () => {
+    const ts = Date.now()
+    const realUser = await payload.create({
+      collection: 'users',
+      data: {
+        email: `spoofrp-real-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Real ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const otherUser = await payload.create({
+      collection: 'users',
+      data: {
+        email: `spoofrp-other-${ts}@kr1688.test`,
+        password: `pwd-${ts}`,
+        name: `Other ${ts}`,
+        role: 'reader',
+      },
+      overrideAccess: true,
+      disableVerificationEmail: true,
+    })
+
+    const story = await payload.create({
+      collection: 'stories',
+      data: {
+        titleAr: `قصة اختبار ${ts}`,
+        demoOnly: true,
+        contentStatus: 'draft',
+      },
+      overrideAccess: true,
+    })
+
+    const progress = await payload.create({
+      collection: 'reading-progress',
+      data: {
+        user: otherUser.id,
+        story: story.id,
+        progressPercentage: 50,
+      },
+      overrideAccess: false,
+      req: { user: realUser },
+    })
+
+    expect(progress).toBeDefined()
+    expect(progress.user).toBe(realUser.id)
+    expect(progress.user).not.toBe(otherUser.id)
+  })
+})
+
+// ---------------------------------------------------------------------------
 // ReadingProgress
 // ---------------------------------------------------------------------------
 
