@@ -1,6 +1,5 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
 
-import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
 
 /**
@@ -23,16 +22,13 @@ export const Comments: CollectionConfig = {
   },
   access: {
     create: authenticated,
-    read: ({ req: { user } }) => {
+    read: ({ req: { user } }): Where | boolean => {
       if (!user) {
-        // Public: only approved comments
         return { status: { equals: 'approved' } }
       }
       if (user.role === 'admin') {
-        // Admin: all comments
         return true
       }
-      // Reader: approved OR own
       return {
         or: [
           { status: { equals: 'approved' } },
@@ -62,7 +58,7 @@ export const Comments: CollectionConfig = {
       required: true,
       label: 'Comment Body',
       access: {
-        read: anyone,
+        read: () => true,
         update: ({ req: { user } }) => Boolean(user),
       },
     },
@@ -112,7 +108,7 @@ export const Comments: CollectionConfig = {
       label: 'Status',
       access: {
         create: () => false,
-        read: anyone,
+        read: () => true,
         update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
       },
     },
@@ -122,7 +118,7 @@ export const Comments: CollectionConfig = {
       label: 'Moderation Reason',
       access: {
         create: () => false,
-        read: anyone,
+        read: () => true,
         update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
       },
       admin: {
@@ -137,7 +133,7 @@ export const Comments: CollectionConfig = {
       label: 'Like Count',
       access: {
         create: () => false,
-        read: anyone,
+        read: () => true,
         update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
       },
       admin: {
@@ -157,7 +153,7 @@ export const Comments: CollectionConfig = {
       label: 'AI Recommendation',
       access: {
         create: () => false,
-        read: anyone,
+        read: () => true,
         update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
       },
       admin: {
@@ -171,6 +167,9 @@ export const Comments: CollectionConfig = {
         // S04: Always derive author from req.user — reject spoofing
         if (!req.user) {
           throw new Error('Authentication required to create or update a comment.')
+        }
+        if (!data) {
+          throw new Error('No data provided for comment.')
         }
         data.author = req.user.id
 

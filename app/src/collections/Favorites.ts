@@ -44,7 +44,11 @@ export const Favorites: CollectionConfig = {
         if (!req.user) {
           throw new Error('Authentication required.')
         }
+        if (!data) {
+          throw new Error('No data provided.')
+        }
         data.user = req.user.id
+        const userId = req.user.id
 
         if (operation === 'create' || operation === 'update') {
           const storyId = typeof data?.story === 'object' ? data.story.id : data?.story
@@ -56,7 +60,7 @@ export const Favorites: CollectionConfig = {
                 collection: 'favorites',
                 where: {
                   and: [
-                    { user: { equals: req.user.id } },
+                    { user: { equals: userId } },
                     { story: { equals: storyId } },
                   ],
                 },

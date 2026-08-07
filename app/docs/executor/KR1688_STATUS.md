@@ -50,7 +50,7 @@ Acceptance Requested: no
 | S01 | done | 2026-08-05 | 2026-08-05 | verified | Startup evidence and plan — commit 42fa6a3 |
 | S02 | done | 2026-08-07 | 2026-08-07 | verified | ESLint toolchain truth — pnpm lint 0 errors/warnings, commit 18b4ed3 |
 | S03 | done | 2026-08-07 | 2026-08-07 | verified | Reader identity — role field, spoof protection, 2a2a3fc |
-| S04 | doing | 2026-08-07 | | pending | Comment authorization and moderation |
-| S05 | queued | | | pending | Stale route/template cleanup |
-| S06 | queued | | | pending | Compatible runtime and genuine verification |
+| S04 | done | 2026-08-07 | 2026-08-07 | verified | Comment authorization — req.user override, moderation, adcd305 |
+| S05 | done | 2026-08-07 | 2026-08-07 | verified | Stale route/template cleanup — 676bb5f |
+| S06 | doing | 2026-08-07 | | pending | Compatible runtime and genuine verification |
 | S07 | queued | | | pending | Final quality and acceptance request |

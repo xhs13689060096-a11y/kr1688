@@ -41,6 +41,7 @@ export const Users: CollectionConfig = {
   hooks: {
     beforeValidate: [
       ({ req, data, operation }) => {
+        if (!data) return
         // Public registration always creates reader role
         // Only admin can assign admin role
         if (operation === 'create' && (!req.user || req.user.role !== 'admin')) {
