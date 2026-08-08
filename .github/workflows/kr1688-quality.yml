@@ -1,0 +1,65 @@
+name: KR1688 Quality Gate
+
+on:
+  push:
+    branches: [marvis/ops-01-automated-acceptance]
+    paths:
+      - 'app/**'
+      - '.github/workflows/kr1688-quality.yml'
+  pull_request:
+    branches: [marvis/ops-01-automated-acceptance]
+    paths:
+      - 'app/**'
+      - '.github/workflows/kr1688-quality.yml'
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: kr1688_test
+          POSTGRES_PASSWORD: kr1688_test
+          POSTGRES_DB: kr1688_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: |
+          cd app
+          pnpm install --frozen-lockfile
+
+      # RED: intentionally missing build step to provoke failure
+      - name: Verify
+        run: |
+          cd app
+          pnpm generate:types
+          pnpm lint
+          pnpm test:int
+          pnpm test:e2e
+        env:
+          DATABASE_URL: postgresql://kr1688_test:kr1688_test@localhost:5432/kr1688_test
+          PAYLOAD_SECRET: kr1688-ci-test-only-not-production
+          NEXT_PUBLIC_SERVER_URL: http://127.0.0.1:3000
+          CRON_SECRET: kr1688-ci-cron-secret
+          PREVIEW_SECRET: kr1688-ci-preview-secret
