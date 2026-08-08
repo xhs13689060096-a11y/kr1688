@@ -7,6 +7,9 @@ let payload: Payload
 
 describe('API', () => {
   beforeAll(async () => {
+    expect(process.env.PAYLOAD_SECRET, 'PAYLOAD_SECRET must be set before Payload init').toBeTruthy()
+    expect(process.env.DATABASE_URL, 'DATABASE_URL must be set before Payload init').toBeTruthy()
+
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })
   })
