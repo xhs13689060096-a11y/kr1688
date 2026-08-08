@@ -14,10 +14,9 @@ updated: 2026-08-07
 tags: [kr1688, marvis, status, phase-2b, repair-02, repository-mirror]
 ---
 
-# KR1688 Phase 2B Status (Repository Mirror)
+# Historical KR1688 Phase 2B Status
 
-> This file is the repository-side mirror of the Vault status file.
-> Vault is authority. This file must stay synchronized.
+> Historical evidence only. It is not a live execution source. The sole detailed state is `docs/executor/STATUS.yaml`; the live task protocol is `docs/executor/KR1688_CURRENT_EXECUTOR_PACKET.md`.
 
 Phase: Phase 2B Repair-02 — Security, Test Truth, and Acceptance Closure
 Phase Status: awaiting_acceptance

@@ -1,0 +1,11 @@
+packet_id: OPS-01-AUTOMATED-ACCEPTANCE
+phase: PHASE-2B-REPAIR-02
+state: ready_for_marvis
+next_task: O01
+branch: marvis/ops-01-automated-acceptance
+head_sha: null
+ci_url: null
+ci_conclusion: not_run
+acceptance_requested: false
+updated: 2026-08-08
+source_of_truth: true
