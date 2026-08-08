@@ -1,9 +1,9 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
 state: in_progress
-next_task: A03
+next_task: A04
 branch: marvis/ops-01-automated-acceptance
-head_sha: c29088c87e83601bd2e221f81a41d8bff68d1a86
+head_sha: dd5f9af565b69104953ae8f49fb351f0940df57c
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
@@ -34,3 +34,18 @@ tasks:
       - app/pnpm-lock.yaml
       - app/scripts/verify-guardrails.mjs
       - app/tsconfig.json
+
+  A03:
+    status: done
+    head_sha: dd5f9af565b69104953ae8f49fb351f0940df57c
+    result: |
+      RED: E2E web server fails (cannot connect to Postgres) — local PG unavailable.
+      GREEN-READY: seedKr1688.ts creates published Story + Chapter + reader with kr1688-e2e- prefix;
+      frontend E2E asserts explicit story/chapter URLs from seed; admin E2E simplified to login-form-only;
+      Playwright config passes env vars to webServer.
+      Awaiting GitHub Actions PG in A04 for GREEN.
+    changed_files:
+      - app/tests/helpers/seedKr1688.ts
+      - app/tests/e2e/frontend.e2e.spec.ts
+      - app/tests/e2e/admin.e2e.spec.ts
+      - app/playwright.config.ts
