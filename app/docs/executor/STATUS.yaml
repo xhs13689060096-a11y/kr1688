@@ -1,9 +1,9 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
 state: in_progress
-next_task: A02
+next_task: A03
 branch: marvis/ops-01-automated-acceptance
-head_sha: 1ce9053e0d163f495717bf923c7e711424166651
+head_sha: c29088c87e83601bd2e221f81a41d8bff68d1a86
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
@@ -22,3 +22,15 @@ tasks:
       - app/vitest.setup.ts
       - app/test.env
       - app/tests/int/api.int.spec.ts
+
+  A02:
+    status: done
+    head_sha: c29088c87e83601bd2e221f81a41d8bff68d1a86
+    result: |
+      RED: eslint errored config (missing deps: @eslint/js, typescript-eslint, etc.); guardrail fixture detected forbidden patterns.
+      GREEN: pnpm lint exit 0 (42 warnings, 0 errors); guardrail exit 0 (zero forbidden patterns).
+    changed_files:
+      - app/package.json
+      - app/pnpm-lock.yaml
+      - app/scripts/verify-guardrails.mjs
+      - app/tsconfig.json
