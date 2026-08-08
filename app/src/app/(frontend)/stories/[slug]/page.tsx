@@ -5,6 +5,7 @@ import { getPayload } from 'payload'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { cache } from 'react'
+import Image from 'next/image'
 import RichText from '@/components/RichText'
 
 export const dynamic = 'force-dynamic'
@@ -98,13 +99,13 @@ export default async function StoryDetailPage({ params: paramsPromise }: Args) {
           <div className="flex flex-col md:flex-row gap-8">
             {/* Cover Image */}
             <div className="flex-shrink-0 w-full md:w-64">
-              <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden shadow-md">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden shadow-md relative">
                 {coverUrl ? (
-                  <img
+                  <Image
                     src={coverUrl}
                     alt={story.titleAr}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
