@@ -39,7 +39,7 @@ Replace claim-based completion with an automatic GitHub quality gate for the exi
 
 | ID | Objective | Completion proof | Status |
 |---|---|---|---|
-| O01 | Create the branch and initialize `STATUS.yaml` as planned. | Branch exists remotely; status names branch and next task O02. | queued |
+| O01 | Create the branch and initialize `STATUS.yaml` as planned. | Branch exists remotely at `c107bb3`; status names branch and next task O02. | done |
 | O02 | Make test environment, lint, and guardrail verification real. | A deliberate test/lint/guardrail violation is observed failing, then the clean suite passes locally as far as local services permit. | queued |
 | O03 | Make integration and E2E suites self-contained for a disposable PostgreSQL database. | Tests target only approved routes and include deterministic seed/cleanup. | queued |
 | O04 | Add the GitHub Actions Node 26 + PostgreSQL 16 workflow. | One deliberate red workflow run is recorded, then workflow configuration is corrected. | queued |

@@ -1,9 +1,9 @@
 packet_id: OPS-01-AUTOMATED-ACCEPTANCE
 phase: PHASE-2B-REPAIR-02
-state: ready_for_marvis
-next_task: O01
+state: executing
+next_task: O02
 branch: marvis/ops-01-automated-acceptance
-head_sha: null
+head_sha: c107bb3
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
