@@ -64,6 +64,7 @@ describe('Favorites', () => {
         overrideAccess: false,
       })
       expect.unreachable('Unauthenticated create should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -111,6 +112,7 @@ describe('Favorites', () => {
         req: { user },
       })
       expect.unreachable('Duplicate favorite should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.message || '').toMatch(/already exists/i)
@@ -135,6 +137,7 @@ describe('Favorites', () => {
     })
 
     expect(result.totalDocs).toBeGreaterThanOrEqual(1)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const hasOwn = result.docs.some((doc: any) => (typeof doc.user === 'object' ? doc.user.id : doc.user) === user.id)
     expect(hasOwn).toBe(true)
   })
@@ -161,6 +164,7 @@ describe('Favorites', () => {
 
     // ownerOrAdmin filters to documents where user == current user
     const hasOthers = result.docs.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) => typeof doc.user === 'string'
         ? doc.user !== userB.id
         : doc.user?.id !== userB.id,
@@ -256,6 +260,7 @@ describe('S03 — User roles and registration', () => {
         req: { user: adminUser },
       })
       expect.unreachable('Admin should not be able to update another user role')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -296,6 +301,7 @@ describe('S03 — User roles and registration', () => {
         req: { user: userB },
       })
       expect.unreachable('Reader should not be able to read another user')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -361,6 +367,7 @@ describe('S03 — User roles and registration', () => {
         req: { user: admin },
       })
       expect.unreachable('Admin should not be able to read another user')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -472,6 +479,7 @@ describe('S03 — Favorites spoofing protection', () => {
     })
 
     const hasA = result.docs.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) => typeof doc.user === 'string'
         ? doc.user === userA.id
         : doc.user?.id === userA.id,
@@ -562,6 +570,7 @@ describe('ReadingProgress', () => {
         overrideAccess: false,
       })
       expect.unreachable('Unauthenticated create should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -606,6 +615,7 @@ describe('ReadingProgress', () => {
         req: { user },
       })
       expect.unreachable('Negative progressPercentage should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       // Payload validates min:0 on the number field at the API level
@@ -633,6 +643,7 @@ describe('ReadingProgress', () => {
         req: { user },
       })
       expect.unreachable('>100 progressPercentage should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       const valMsg2 = error.message || error.errors?.[0]?.message || ''
@@ -662,6 +673,7 @@ describe('ReadingProgress', () => {
         req: { user },
       })
       expect.unreachable('Duplicate progress should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.message || '').toMatch(/already exists/i)
@@ -688,6 +700,7 @@ describe('ReadingProgress', () => {
     })
 
     const hasOthers = result.docs.some(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (doc: any) => typeof doc.user === 'string'
         ? doc.user !== userB.id
         : doc.user?.id !== userB.id,

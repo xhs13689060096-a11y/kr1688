@@ -396,6 +396,7 @@ describe('Comments S04', () => {
       limit: 50,
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const myDoc = result.docs.find((d: any) => d.id === pending.id)
     expect(myDoc).toBeDefined()
   })
