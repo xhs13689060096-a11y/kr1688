@@ -87,6 +87,7 @@ export default async function HomePage() {
                   {/* Cover Image */}
                   <div className="aspect-[3/4] bg-muted overflow-hidden">
                     {coverUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={coverUrl}
                         alt={s.titleAr}

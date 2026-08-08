@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(__filename)
+const _dirname = path.dirname(__filename)
 import { redirects } from './redirects'
 
 const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
