@@ -99,8 +99,8 @@ export default async function StoryDetailPage({ params: paramsPromise }: Args) {
             {/* Cover Image */}
             <div className="flex-shrink-0 w-full md:w-64">
               <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden shadow-md">
-                {coverUrl ? (
               {/* eslint-disable-next-line @next/next/no-img-element */}
+                {coverUrl ? (
                   <img
                     src={coverUrl}
                     alt={story.titleAr}
