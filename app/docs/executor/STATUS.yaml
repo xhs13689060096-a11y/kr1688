@@ -1,9 +1,9 @@
-packet_id: OPS-01-AUTOMATED-ACCEPTANCE
+packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
-state: executing
-next_task: O02
+state: ready_for_marvis
+next_task: A01
 branch: marvis/ops-01-automated-acceptance
-head_sha: c107bb3
+head_sha: 03fbb67
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
