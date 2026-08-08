@@ -196,6 +196,7 @@ describe('Comments S04', () => {
         req: { user: attacker },
       })
       expect.unreachable('Attacker should not be able to update')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
     }
@@ -228,6 +229,7 @@ describe('Comments S04', () => {
         req: { user: admin },
       })
       expect.unreachable('Admin should not be able to update comment status')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -258,6 +260,7 @@ describe('Comments S04', () => {
         req: { user: admin },
       })
       expect.unreachable('Admin should not be able to set likeCount')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -288,6 +291,7 @@ describe('Comments S04', () => {
         req: { user: admin },
       })
       expect.unreachable('Admin should not be able to set aiRecommendation')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -317,6 +321,7 @@ describe('Comments S04', () => {
         req: { user: admin },
       })
       expect.unreachable('Admin should not be able to delete any comment')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
@@ -347,6 +352,7 @@ describe('Comments S04', () => {
         req: { user: owner },
       })
       expect.unreachable('Reader should not be able to delete')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
     }
@@ -409,6 +415,7 @@ describe('Comments S04', () => {
         req: { user: reader },
       })
       expect.unreachable('Validation should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.message || '').toMatch(/story|chapter|must be associated/i)
@@ -443,6 +450,7 @@ describe('Comments S04', () => {
         req: { user: reader },
       })
       expect.unreachable('Reply with chapter should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.message || '').toMatch(/reply|chapter|parent/i)
@@ -491,6 +499,7 @@ describe('Comments S04', () => {
         overrideAccess: false,
       })
       expect.unreachable('Unauthenticated create should have thrown')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
     }

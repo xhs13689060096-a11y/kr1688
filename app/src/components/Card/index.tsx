@@ -11,6 +11,7 @@ export type CardDocData = {
   title?: string | null
   meta?: {
     description?: string | null
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
     image?: any
   } | null
   categories?: Array<{ title?: string | null } | string> | null

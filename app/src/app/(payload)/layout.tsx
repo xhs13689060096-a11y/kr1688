@@ -17,7 +17,7 @@ type Args = {
 
 export const generateViewport = generatePayloadViewport
 
-const serverFunction: ServerFunctionClient = async function (args) {
+const _serverFunction: ServerFunctionClient = async function (args) {
   'use server'
   return handleServerFunctions({
     ...args,
