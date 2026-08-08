@@ -3,7 +3,7 @@ phase: PHASE-2B-REPAIR-02
 state: ready_for_marvis
 next_task: A01
 branch: marvis/ops-01-automated-acceptance
-head_sha: 74cc08b
+head_sha: null
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
