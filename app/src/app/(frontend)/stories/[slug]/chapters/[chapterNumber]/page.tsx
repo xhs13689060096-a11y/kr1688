@@ -435,10 +435,13 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     return { title: 'غير موجود — KR1688' }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chapter = result.chapter as any
 
   return {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     title: `${chapter.titleAr || `الفصل ${num}`} — ${(result.story as any).titleAr} — KR1688`,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     description: chapter.titleAr || `الفصل ${num} من ${(result.story as any).titleAr}`,
   }
 }

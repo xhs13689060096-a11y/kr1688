@@ -63,14 +63,17 @@ export default async function StoryDetailPage({ params: paramsPromise }: Args) {
   const { slug } = await paramsPromise
   const decodedSlug = decodeURIComponent(slug)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const story = await queryStoryBySlug(decodedSlug) as any
 
   if (!story) {
     notFound()
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chapters = await queryPublishedChapters(story.id) as any[]
   const coverUrl = story.coverImage?.url
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const tags = (story.tags ?? []).filter((t: any) => t.tag)
   const synopsisAr = story.synopsisAr
 
@@ -251,6 +254,7 @@ export default async function StoryDetailPage({ params: paramsPromise }: Args) {
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { slug } = await paramsPromise
   const decodedSlug = decodeURIComponent(slug)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const story = await queryStoryBySlug(decodedSlug) as any
 
   if (!story) {
