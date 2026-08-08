@@ -49,6 +49,11 @@ jobs:
           cd app
           pnpm install --frozen-lockfile
 
+      - name: Install Playwright
+        run: |
+          cd app
+          npx playwright install --with-deps chromium
+
       - name: Build
         run: |
           cd app
