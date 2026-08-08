@@ -1,11 +1,24 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
-state: ready_for_marvis
-next_task: A01
+state: in_progress
+next_task: A02
 branch: marvis/ops-01-automated-acceptance
-head_sha: null
+head_sha: 1ce9053e0d163f495717bf923c7e711424166651
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
 updated: 2026-08-08
 source_of_truth: true
+
+tasks:
+  A01:
+    status: done
+    head_sha: 1ce9053e0d163f495717bf923c7e711424166651
+    result: |
+      RED: PAYLOAD_SECRET assertion failed (undefined → truthy required) — confirmed.
+      GREEN: test.env loaded via dotenv.config in vitest.setup.ts; PAYLOAD_SECRET + DATABASE_URL assertions pass.
+      PG: connection ECONNREFUSED ::1:5432 (local PG unavailable; GitHub Actions will supply in A04).
+    changed_files:
+      - app/vitest.setup.ts
+      - app/test.env
+      - app/tests/int/api.int.spec.ts
