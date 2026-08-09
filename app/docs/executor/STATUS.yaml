@@ -1,12 +1,12 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
-phase: PHASE-2B-REPAIR-02
-state: in_progress
-next_task: C04
+phase: PHASE-2C-SECURITY-BASELINE
+state: acceptance_requested
+next_task: none
 branch: marvis/ops-01-automated-acceptance
-head_sha: 1c9e824ef7cb43b1741524e34baea5d5c63dce27
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31307879811
+head_sha: dd059195b63523ca5d1d4e3e7a2b3651d13b266f
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31309202427
 ci_conclusion: success
-acceptance_requested: false
+acceptance_requested: true
 updated: 2026-08-09
 source_of_truth: true
 
@@ -168,3 +168,45 @@ tasks:
       - app/.env.example
       - app/playwright.config.ts
       - .github/workflows/kr1688-quality.yml
+
+  C04:
+    status: done
+    head_sha: 3fc8dc5bb53189dbbadbc6e63e7a964d7cf63f25
+    result: |
+      RED: C04 module imports were unresolved locally before the pure interfaces existed.
+      GREEN: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31308572921
+      SUCCESS: Node 26 + PostgreSQL completed 49 integration tests, 7 Chrome E2E tests,
+      build and guardrails. No external limiter or 2FA service was connected.
+    changed_files:
+      - app/src/security/rateLimit.ts
+      - app/src/security/admin2fa.ts
+      - app/tests/int/security-auth.test.ts
+      - app/docs/security/PHASE3A_LAUNCH_SECURITY_GATE.md
+
+  C05:
+    status: done
+    head_sha: 9b7175898afad2d07f92caabb0c81a5231790247
+    result: |
+      RED: database role and recovery documents were absent; contract tests failed.
+      GREEN: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31309109390
+      SUCCESS: Node 26 + PostgreSQL completed 51 integration tests, 7 Chrome E2E tests,
+      build and guardrails. The role and recovery documents contain placeholders only.
+    changed_files:
+      - app/docs/security/postgres-roles.sql
+      - app/docs/security/BACKUP_AND_RESTORE_RUNBOOK.md
+      - app/tests/int/security-auth.test.ts
+
+  C06:
+    status: done
+    head_sha: dd059195b63523ca5d1d4e3e7a2b3651d13b266f
+    result: |
+      RED: credential-shaped fixture was rejected, but an acceptance=true status fixture
+      with ci_conclusion=failure was not rejected.
+      GREEN: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31309202427
+      SUCCESS: Node 26 + PostgreSQL completed type generation, lint, 51 integration tests,
+      7 Chrome E2E tests, build and guardrails. The verifier rejects unsafe acceptance
+      declarations and no temporary fixture remains committed.
+    changed_files:
+      - app/scripts/verify-guardrails.mjs
+      - app/docs/executor/STATUS.yaml
+      - app/docs/executor/PHASE2C_SECURITY_REPORT.md
