@@ -1,6 +1,6 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
-state: blocked
+state: in_progress
 next_task: A04
 branch: marvis/ops-01-automated-acceptance
 head_sha: 09e31b92d2ba9793a20e139823a81ac44c84c116
@@ -51,7 +51,7 @@ tasks:
       - app/playwright.config.ts
 
   A04:
-    status: blocked
+    status: doing
     head_sha: 09e31b92d2ba9793a20e139823a81ac44c84c116
     result: |
       RED PHASE (036032f):
@@ -72,10 +72,9 @@ tasks:
         Valid RED: 1f7abd5e5aebbd9bbfd7db325a503b5bf29e868a
         https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289127215
         FAILURE as intended: `pnpm nonexistent-command` executed and exited 1.
-        BLOCKED: full verifier runs af388f2, 9d7130e, and 09e31b9 all stalled
-        at the Playwright installation step before `pnpm verify:ci` started.
-        Repairs attempted: raise job timeout 15→30 minutes; install only the pinned
-        Chromium browser without system dependencies. Both failed to reach Verify.
-        No further repair is permitted without a new Codex decision.
+        RETRY REQUIRED: `09e31b9` downloaded Chromium successfully, then was
+        manually cancelled during Playwright's post-download installation phase.
+        It did not reach the 30-minute timeout and did not establish an installation failure.
+        A04 remains doing until an uncancelled full verifier run reaches a conclusion.
     changed_files:
       - .github/workflows/kr1688-quality.yml

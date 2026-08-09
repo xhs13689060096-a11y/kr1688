@@ -12,14 +12,14 @@ This run deliberately omitted the Playwright installation so the workflow reache
 intended missing-command assertion before any browser-installation work. It is RED
 evidence only and does not represent a passing quality gate.
 
-## A04 blocker
+## A04 retry note
 
-The full verifier did not start in three successive Actions runs because Playwright
-browser installation stalled first:
+The full verifier has not yet reached a conclusion because prior runs were cancelled
+during Playwright browser installation:
 
-- `af388f2` / [31289189324](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289189324): cancelled after the install stalled.
-- `9d7130e` / [31289471984](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289471984): cancelled after increasing the job timeout from 15 to 30 minutes did not reach Verify.
-- `09e31b9` / [31289573947](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289573947): cancelled after switching to the pinned Chromium-only install still did not reach Verify.
+- `af388f2` / [31289189324](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289189324): cancelled during post-download installation.
+- `9d7130e` / [31289471984](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289471984): cancelled during post-download installation.
+- `09e31b9` / [31289573947](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289573947): Chromium download reached 100%, then the run was manually cancelled after 3 minutes 33 seconds.
 
-This is an infrastructure/Playwright-installation blocker. The task remains blocked;
-no A05 or security-baseline task may begin.
+No installation failure has been demonstrated. A04 remains in progress and requires
+one uncancelled quality-gate run; no A05 or security-baseline task may begin yet.
