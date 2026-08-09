@@ -3,11 +3,11 @@ phase: PHASE-2B-REPAIR-02
 state: in_progress
 next_task: A04
 branch: marvis/ops-01-automated-acceptance
-head_sha: 036032f
+head_sha: null
 ci_url: null
 ci_conclusion: not_run
 acceptance_requested: false
-updated: 2026-08-08
+updated: 2026-08-09
 source_of_truth: true
 
 tasks:
@@ -51,10 +51,26 @@ tasks:
       - app/playwright.config.ts
 
   A04:
-    status: done
+    status: doing
     head_sha: null
     result: |
-      RED: commit 036032f pushed — workflow deliberately missing build step, confirmed RED run recorded.
-      GREEN: build step added (pnpm build with full env), workflow now has Node 26 + PostgreSQL service + lint + int + e2e.
+      RED PHASE (036032f):
+        SHA: 036032f93ef1890912a237aa6d20dd0b0908976c
+        URL: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31259756648
+        Conclusion: FAILURE (expected — workflow missing build step)
+        Log: lint passed (40w/0e); int tests failed (Drizzle parallel CREATE TABLE conflict)
+
+      GREEN PHASE (865c839):
+        SHA: 865c839f2175eaa317bb94b8ca318061ccbb1ac8
+        URL: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31260155547
+        Conclusion: FAILURE (NOT expected — need rework)
+        Log: Build passed; lint 40w/0e; favorites-reading.test.ts 11/20 failed
+        Root causes: Drizzle parallel enum conflict (CREATE TYPE already exists);
+        Payload v4 behavior changes (401→403, relation objects vs IDs, validation message format)
+
+      REWORK (current):
+        Workflow simplified to single `pnpm verify:ci` step under PostgreSQL service.
+        verify:ci = generate:types && lint && test:int && test:e2e && build && guardrails
+        Awaiting user review before marking done.
     changed_files:
       - .github/workflows/kr1688-quality.yml

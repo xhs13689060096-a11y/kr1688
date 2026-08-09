@@ -54,24 +54,10 @@ jobs:
           cd app
           npx playwright install --with-deps chromium
 
-      - name: Build
-        run: |
-          cd app
-          pnpm build
-        env:
-          DATABASE_URL: postgresql://kr1688_test:kr1688_test@localhost:5432/kr1688_test
-          PAYLOAD_SECRET: kr1688-ci-test-only-not-production
-          NEXT_PUBLIC_SERVER_URL: http://127.0.0.1:3000
-          CRON_SECRET: kr1688-ci-cron-secret
-          PREVIEW_SECRET: kr1688-ci-preview-secret
-
       - name: Verify
         run: |
           cd app
-          pnpm generate:types
-          pnpm lint
-          pnpm test:int
-          pnpm test:e2e
+          pnpm verify:ci
         env:
           DATABASE_URL: postgresql://kr1688_test:kr1688_test@localhost:5432/kr1688_test
           PAYLOAD_SECRET: kr1688-ci-test-only-not-production
