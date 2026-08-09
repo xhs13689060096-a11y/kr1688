@@ -143,7 +143,7 @@ describe('Comments S04', () => {
     expect(updated.id).toBe(comment.id)
   })
 
-  it('reader cannot change comment status (stays pending)', async () => {
+  it('reader cannot change comment status', async () => {
     const reader = await createTestUser('reader')
     const story = await createTestStory()
 
@@ -158,8 +158,7 @@ describe('Comments S04', () => {
     })
     expect(comment.status).toBe('pending')
 
-    // Reader tries to self-approve; beforeValidate strips it
-    const updated = await payload.update({
+    await expect(payload.update({
       collection: 'comments',
       id: comment.id,
       data: {
@@ -168,9 +167,7 @@ describe('Comments S04', () => {
       },
       overrideAccess: false,
       req: { user: reader },
-    })
-
-    expect(updated.status).toBe('pending')
+    })).rejects.toThrow('status')
   })
 
   it('reader cannot update another user comment', async () => {
