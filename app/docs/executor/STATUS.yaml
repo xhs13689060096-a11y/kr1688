@@ -1,11 +1,11 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
 state: in_progress
-next_task: C02
+next_task: C03
 branch: marvis/ops-01-automated-acceptance
-head_sha: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31306505624
-ci_conclusion: failure
+head_sha: b1f69deae59f210801e7fb2c6b61e57f00cc50a4
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31306998776
+ci_conclusion: success
 acceptance_requested: false
 updated: 2026-08-09
 source_of_truth: true
@@ -118,8 +118,8 @@ tasks:
       - app/tests/int/security-auth.test.ts
 
   C02:
-    status: doing
-    head_sha: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
+    status: done
+    head_sha: b1f69deae59f210801e7fb2c6b61e57f00cc50a4
     result: |
       RED: ac8b81ac41f54da2250c8a7bb3560627cdea303a
       https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31302685673
@@ -134,6 +134,10 @@ tasks:
       explicit rejection. Two minimal repairs for this root cause are exhausted; Codex review required.
       Codex decision: the reviewed raw-input beforeOperation design is active; it inspects args.data
       before Payload merges or silently filters it. A new exact GitHub Actions run is required.
+      GREEN: b1f69deae59f210801e7fb2c6b61e57f00cc50a4
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31306998776
+      SUCCESS: 44 integration tests (including explicit reader protected-field rejection),
+      Chrome E2E tests, build and guardrails completed with no required skips.
     changed_files:
       - app/src/collections/Comments.ts
       - app/tests/int/comments.test.ts
