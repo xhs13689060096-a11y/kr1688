@@ -10,6 +10,7 @@
  * Usage:
  *   node scripts/verify-guardrails.mjs                    # production mode
  *   node scripts/verify-guardrails.mjs --fixture <path>   # test mode
+ *   node scripts/verify-guardrails.mjs --status-fixture <path>
  */
 
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs'
@@ -96,11 +97,29 @@ function scanFile(filePath) {
   return findings
 }
 
+function verifyAcceptanceStatus(filePath) {
+  const content = readFileSync(filePath, 'utf-8')
+  if (!/^acceptance_requested:\s*true\s*$/m.test(content)) return []
+
+  const findings = []
+  if (!/^ci_conclusion:\s*success\s*$/m.test(content)) {
+    findings.push('acceptance_requested requires ci_conclusion: success')
+  }
+  if (!/^head_sha:\s*[a-f0-9]{40}\s*$/m.test(content)) {
+    findings.push('acceptance_requested requires a 40-character head_sha')
+  }
+  if (!/^ci_url:\s*https:\/\/github\.com\/[^\s]+\/actions\/runs\/\d+\s*$/m.test(content)) {
+    findings.push('acceptance_requested requires a GitHub Actions run URL')
+  }
+  return findings
+}
+
 // --------------- main ---------------
 
 async function main() {
   const args = process.argv.slice(2)
   const fixtureIdx = args.indexOf('--fixture')
+  const statusFixtureIdx = args.indexOf('--status-fixture')
 
   if (fixtureIdx !== -1 && args[fixtureIdx + 1]) {
     const fixturePath = resolve(args[fixtureIdx + 1])
@@ -120,11 +139,27 @@ async function main() {
     process.exit(0)
   }
 
+  if (statusFixtureIdx !== -1 && args[statusFixtureIdx + 1]) {
+    const fixturePath = resolve(args[statusFixtureIdx + 1])
+    if (!existsSync(fixturePath)) {
+      console.error(`Fixture not found: ${fixturePath}`)
+      process.exit(2)
+    }
+    const findings = verifyAcceptanceStatus(fixturePath)
+    if (findings.length > 0) {
+      findings.forEach((finding) => console.log(`[status] ${finding}`))
+      process.exit(1)
+    }
+    console.log('Status guardrail check passed (fixture mode).')
+    process.exit(0)
+  }
+
   // Production mode
   const baseDir = resolve('.')
   const srcDir = join(baseDir, 'src')
   const scriptsDir = join(baseDir, 'scripts')
   const filesToScan = []
+  const allFindings = []
 
   if (existsSync(srcDir)) walkSync(srcDir, baseDir, filesToScan)
 
@@ -141,6 +176,14 @@ async function main() {
 
   if (existsSync(scriptsDir)) walkSync(scriptsDir, baseDir, filesToScan)
 
+  const statusPath = join(baseDir, 'docs', 'executor', 'STATUS.yaml')
+  if (existsSync(statusPath)) {
+    const statusFindings = verifyAcceptanceStatus(statusPath)
+    for (const finding of statusFindings) {
+      allFindings.push({ file: relative(baseDir, statusPath), rule: 'acceptance status', match: finding })
+    }
+  }
+
   const uniqueFiles = [...new Set(filesToScan)]
     .filter((f) => {
       const rel = relative(baseDir, f)
@@ -154,7 +197,6 @@ async function main() {
       return true
     })
 
-  const allFindings = []
   for (const f of uniqueFiles) {
     allFindings.push(...scanFile(f))
   }
