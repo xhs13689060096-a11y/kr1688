@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import React, { cache } from 'react'
 import Image from 'next/image'
 import RichText from '@/components/RichText'
+import { FavoriteButton } from '@/components/reader/FavoriteButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -174,6 +175,8 @@ export default async function StoryDetailPage({ params: paramsPromise }: Args) {
                   </span>
                 ))}
               </div>
+
+              <FavoriteButton storyId={story.id} />
 
               {synopsisAr && (
                 <div className="pt-4 border-t border-border">
