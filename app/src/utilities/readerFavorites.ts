@@ -15,6 +15,7 @@ export async function createFavorite(context: ReaderRequestContext, storyId: num
   if (existing.totalDocs > 0) return { favorited: true }
   await context.payload.create({
     collection: 'favorites',
+    draft: false,
     req: context.req,
     overrideAccess: false,
     data: { story: storyId },
