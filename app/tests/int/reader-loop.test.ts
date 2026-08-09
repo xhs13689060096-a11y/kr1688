@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 import config from '@/payload.config'
 import { createPendingComment } from '@/utilities/readerComments'
 
-import { requireReader } from '@/utilities/readerRequest'
+import { assertReaderRole, requireReader } from '@/utilities/readerRequest'
 import { createFavorite, removeFavorite } from '@/utilities/readerFavorites'
 import { validateProgressInput } from '@/utilities/readerProgress'
 
@@ -13,6 +13,10 @@ describe('D01 — reader request boundary', () => {
     await expect(requireReader(new Request('http://localhost/reader'))).rejects.toThrow(
       'Authentication required',
     )
+  })
+
+  it('rejects an administrator from reader-only state changes', () => {
+    expect(() => assertReaderRole({ role: 'admin' } as never)).toThrow('Reader role required')
   })
 })
 
@@ -42,12 +46,12 @@ describe('D04 — pending reader comments', () => {
     })
     const story = await payload.create({
       collection: 'stories',
-      data: { titleAr: `قصة تعليق ${suffix}`, contentStatus: 'draft', demoOnly: true },
+      data: { titleAr: `قصة تعليق ${suffix}`, contentStatus: 'published', demoOnly: true },
       overrideAccess: true,
     })
     const chapter = await payload.create({
       collection: 'chapters',
-      data: { titleAr: `فصل تعليق ${suffix}`, chapterNumber: 1, story: story.id },
+      data: { titleAr: `فصل تعليق ${suffix}`, chapterNumber: 1, story: story.id, status: 'published' },
       overrideAccess: true,
     })
 
@@ -56,5 +60,15 @@ describe('D04 — pending reader comments', () => {
 
     expect(authorId).toBe(reader.id)
     expect(comment.status).toBe('pending')
+  })
+
+  it('rejects a comment on a draft chapter', async () => {
+    const payload = await getPayload({ config })
+    const suffix = Date.now()
+    const reader = await payload.create({ collection: 'users', data: { email: `draft-comment-${suffix}@kr1688.test`, password: 'reader-comment-password', role: 'reader' }, disableVerificationEmail: true, overrideAccess: true })
+    const story = await payload.create({ collection: 'stories', data: { titleAr: `قصة مسودة ${suffix}`, contentStatus: 'draft', demoOnly: true }, overrideAccess: true })
+    const chapter = await payload.create({ collection: 'chapters', data: { titleAr: `فصل مسودة ${suffix}`, chapterNumber: 1, story: story.id, status: 'draft' }, overrideAccess: true })
+
+    await expect(createPendingComment({ payload, req: { user: reader } as never, user: reader }, { chapterId: chapter.id, body: 'تعليق مرفوض' })).rejects.toThrow('Published chapter required')
   })
 })

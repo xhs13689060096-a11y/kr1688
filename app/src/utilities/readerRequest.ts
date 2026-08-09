@@ -9,6 +9,12 @@ export type ReaderRequestContext = {
   user: User
 }
 
+export function assertReaderRole(user: User): void {
+  if (user.role !== 'reader') {
+    throw new Error('Reader role required')
+  }
+}
+
 export async function requireReader(request: Request): Promise<ReaderRequestContext> {
   const payload = await getPayload({ config: configPromise })
   const auth = await payload.auth({ headers: request.headers })
@@ -18,6 +24,7 @@ export async function requireReader(request: Request): Promise<ReaderRequestCont
   }
 
   const user = auth.user as User
+  assertReaderRole(user)
   const req = await createLocalReq({ req: { headers: request.headers }, user }, payload)
   return { payload, req, user }
 }

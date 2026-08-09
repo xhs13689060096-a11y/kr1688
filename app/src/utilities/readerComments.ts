@@ -22,8 +22,22 @@ export async function createPendingComment(context: ReaderRequestContext, input:
     overrideAccess: false,
     depth: 0,
   })
+  if (chapter.status !== 'published') {
+    throw new Error('Published chapter required')
+  }
+  const storyId = typeof chapter.story === 'object' ? chapter.story.id : chapter.story
+  const story = await context.payload.findByID({
+    collection: 'stories',
+    id: storyId,
+    req: context.req,
+    overrideAccess: false,
+    depth: 0,
+  })
+  if (story.contentStatus !== 'published') {
+    throw new Error('Published chapter required')
+  }
   const data: PendingCommentData = {
-    story: chapter.story,
+    story: story.id,
     chapter: chapter.id,
     body: {
       root: {
