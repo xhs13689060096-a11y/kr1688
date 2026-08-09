@@ -196,6 +196,21 @@ export const Comments: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeOperation: [
+      ({ args, operation, req }) => {
+        if (
+          operation === 'update'
+          && req.user?.role !== 'admin'
+          && args.data
+          && typeof args.data === 'object'
+          && !Array.isArray(args.data)
+        ) {
+          assertReaderCommentPatch(args.data)
+        }
+
+        return args
+      },
+    ],
     beforeValidate: [
       ({ req, data, operation }) => {
         // S04: Always derive author from req.user — reject spoofing

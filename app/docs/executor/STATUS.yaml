@@ -1,6 +1,6 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
-state: blocked
+state: in_progress
 next_task: C02
 branch: marvis/ops-01-automated-acceptance
 head_sha: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
@@ -118,7 +118,7 @@ tasks:
       - app/tests/int/security-auth.test.ts
 
   C02:
-    status: blocked
+    status: doing
     head_sha: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
     result: |
       RED: ac8b81ac41f54da2250c8a7bb3560627cdea303a
@@ -132,6 +132,8 @@ tasks:
       FAILURE: author preservation, moderation and reader body update passed, but Payload silently
       retained reader-supplied protected relations rather than rejecting them. The C02 tests require
       explicit rejection. Two minimal repairs for this root cause are exhausted; Codex review required.
+      Codex decision: the reviewed raw-input beforeOperation design is active; it inspects args.data
+      before Payload merges or silently filters it. A new exact GitHub Actions run is required.
     changed_files:
       - app/src/collections/Comments.ts
       - app/tests/int/comments.test.ts
