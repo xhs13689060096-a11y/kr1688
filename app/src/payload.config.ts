@@ -18,10 +18,11 @@ import { Header } from './Header/config'
 import { SiteSettings } from './globals/SiteSettings'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
-import { getServerSideURL } from './utilities/getURL'
+import { loadEnvironment } from './environment'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const environment = loadEnvironment(process.env)
 
 export default buildConfig({
   admin: {
@@ -64,7 +65,7 @@ export default buildConfig({
   editor: defaultLexical,
   db: postgresAdapter({
     pool: {
-      connectionString: process.env.DATABASE_URL,
+      connectionString: environment.databaseURL,
     },
   }),
   collections: [
@@ -93,10 +94,11 @@ export default buildConfig({
     Categories,
     Users,
   ],
-  cors: [getServerSideURL()].filter(Boolean),
+  cors: [environment.serverURL],
   globals: [Header, Footer, SiteSettings],
   plugins,
-  secret: process.env.PAYLOAD_SECRET,
+  maxDepth: 2,
+  secret: environment.payloadSecret,
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -107,14 +109,11 @@ export default buildConfig({
         // Allow logged in users to execute this endpoint (default)
         if (req.user) return true
 
-        const secret = process.env.CRON_SECRET
-        if (!secret) return false
-
         // If there is no logged in user, then check
         // for the Vercel Cron secret to be present as an
         // Authorization header:
         const authHeader = req.headers.get('authorization')
-        return authHeader === `Bearer ${secret}`
+        return authHeader === `Bearer ${environment.cronSecret}`
       },
     },
     tasks: [],
