@@ -506,3 +506,56 @@ describe('Comments S04', () => {
     }
   })
 })
+
+describe('C02 — comment ownership and moderation', () => {
+  beforeAll(async () => {
+    const payloadConfig = await config
+    payload = await getPayload({ config: payloadConfig })
+  })
+
+  it('admin approval preserves the reader author', async () => {
+    const reader = await createTestUser('reader')
+    const admin = await createTestUser('admin')
+    const story = await createTestStory()
+    const comment = await payload.create({
+      collection: 'comments',
+      data: { body: commentBody('Pending reader comment.'), story: story.id },
+      overrideAccess: false,
+      req: { user: reader },
+    })
+
+    const approved = await payload.update({
+      collection: 'comments',
+      id: comment.id,
+      data: { status: 'approved', moderationReason: 'Approved after review.' },
+      overrideAccess: true,
+      req: { user: admin },
+    })
+
+    const authorId = typeof approved.author === 'object' ? approved.author.id : approved.author
+    expect(authorId).toBe(reader.id)
+    expect(approved.status).toBe('approved')
+  })
+
+  it.each(['story', 'chapter', 'parent', 'author'])('reader cannot replace %s on an own comment', async (field) => {
+    const reader = await createTestUser('reader')
+    const otherReader = await createTestUser('reader')
+    const story = await createTestStory()
+    const otherStory = await createTestStory()
+    const comment = await payload.create({
+      collection: 'comments',
+      data: { body: commentBody('Protected relation comment.'), story: story.id },
+      overrideAccess: false,
+      req: { user: reader },
+    })
+
+    const replacement = field === 'author' ? otherReader.id : otherStory.id
+    await expect(payload.update({
+      collection: 'comments',
+      id: comment.id,
+      data: { [field]: replacement },
+      overrideAccess: false,
+      req: { user: reader },
+    })).rejects.toThrow()
+  })
+})
