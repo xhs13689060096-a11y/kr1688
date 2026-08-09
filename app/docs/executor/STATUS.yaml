@@ -1,11 +1,11 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
-state: in_progress
+state: blocked
 next_task: C02
 branch: marvis/ops-01-automated-acceptance
-head_sha: 008bb6480c7ddd3fcba8b7d6c69bf4b5d4b03028
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31302491383
-ci_conclusion: success
+head_sha: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31306505624
+ci_conclusion: failure
 acceptance_requested: false
 updated: 2026-08-09
 source_of_truth: true
@@ -116,3 +116,22 @@ tasks:
     changed_files:
       - app/src/collections/Users/index.ts
       - app/tests/int/security-auth.test.ts
+
+  C02:
+    status: blocked
+    head_sha: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
+    result: |
+      RED: ac8b81ac41f54da2250c8a7bb3560627cdea303a
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31302685673
+      FAILURE: administrator approval reassigned author; reader relation-mutation tests exposed gaps.
+      Attempt 1: 4dfc3be071aec79d894a77174b5d4367c02ab3a1
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31306231900
+      FAILURE: Payload supplied merged update data; reader body updates were incorrectly rejected.
+      Attempt 2: 7a0e5bd1681ad5198b30ea580f3715e3131e7d4d
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31306505624
+      FAILURE: author preservation, moderation and reader body update passed, but Payload silently
+      retained reader-supplied protected relations rather than rejecting them. The C02 tests require
+      explicit rejection. Two minimal repairs for this root cause are exhausted; Codex review required.
+    changed_files:
+      - app/src/collections/Comments.ts
+      - app/tests/int/comments.test.ts
