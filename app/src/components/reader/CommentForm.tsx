@@ -12,7 +12,8 @@ export function CommentForm({ chapterId }: { chapterId: number }) {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const form = new FormData(event.currentTarget)
+    const formElement = event.currentTarget
+    const form = new FormData(formElement)
     setMessage('')
     setSubmitting(true)
 
@@ -25,7 +26,7 @@ export function CommentForm({ chapterId }: { chapterId: number }) {
       })
       if (response.status === 401) return setNeedsLogin(true)
       if (!response.ok) throw new Error('comment failed')
-      event.currentTarget.reset()
+      formElement.reset()
       setMessage('سيظهر تعليقك بعد المراجعة')
     } catch {
       setMessage('تعذر إرسال التعليق')
