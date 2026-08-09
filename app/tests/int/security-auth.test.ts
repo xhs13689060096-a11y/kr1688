@@ -1,4 +1,6 @@
 import { getPayload, type Payload } from 'payload'
+import { readFile } from 'node:fs/promises'
+import { resolve } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import config from '@/payload.config'
@@ -117,5 +119,27 @@ describe('C04 — rate-limit and administrator 2FA launch boundaries', () => {
       requiredBeforePublicLaunch: true,
       enabledInApplication: false,
     })
+  })
+})
+
+describe('C05 — database roles and recovery contract', () => {
+  it('database role script contains the three required least-privilege roles', async () => {
+    const sql = await readFile(resolve(process.cwd(), 'docs/security/postgres-roles.sql'), 'utf8')
+
+    expect(sql).toContain('kr1688_migrate')
+    expect(sql).toContain('kr1688_app')
+    expect(sql).toContain('kr1688_backup')
+    expect(sql).not.toMatch(/GRANT\s+(ALL|SUPERUSER|CREATEROLE)/i)
+  })
+
+  it('recovery runbook names the required metadata checks', async () => {
+    const runbook = await readFile(
+      resolve(process.cwd(), 'docs/security/BACKUP_AND_RESTORE_RUNBOOK.md'),
+      'utf8',
+    )
+
+    for (const collection of ['users', 'stories', 'chapters', 'comments', 'media']) {
+      expect(runbook).toContain(collection)
+    }
   })
 })
