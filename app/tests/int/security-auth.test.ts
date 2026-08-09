@@ -2,6 +2,7 @@ import { getPayload, type Payload } from 'payload'
 import { beforeAll, describe, expect, it } from 'vitest'
 
 import config from '@/payload.config'
+import { Users } from '@/collections/Users'
 
 let payload: Payload
 
@@ -18,6 +19,15 @@ export function assertPublicUserPayload(value: unknown): void {
 }
 
 describe('C01 — authentication and public reader registration', () => {
+  it('explicitly configures verification, lockout, and finite token lifetime', () => {
+    expect(Users.auth).toMatchObject({
+      verify: true,
+      maxLoginAttempts: 5,
+      lockTime: 900000,
+      tokenExpiration: 7200,
+    })
+  })
+
   beforeAll(async () => {
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })
