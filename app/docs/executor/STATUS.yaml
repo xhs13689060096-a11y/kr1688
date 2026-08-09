@@ -75,6 +75,14 @@ tasks:
         Previous blocker: Playwright's bundled Chromium installation did not finish.
         New Codex decision: use the Google Chrome preinstalled on GitHub's Ubuntu runner
         through Playwright's supported `channel: chrome`, with no browser download.
-        A04 remains doing until the exact replacement verifier run reaches a conclusion.
+        Replacement run: a9769a340fe287c59cf7d7090e34039d9f04f4f8
+        https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301127523
+        FAILURE (not accepted): bundled-browser installation is resolved; generate:types,
+        lint and all 36 integration tests passed, but two E2E routes failed because A03's
+        seedKr1688TestData created story/chapter data without returning it to `seeded`.
+        Current minimal repair returns the created Story and Chapter; A04 remains doing
+        until its exact replacement verifier run is green.
     changed_files:
       - .github/workflows/kr1688-quality.yml
+      - app/playwright.config.ts
+      - app/tests/helpers/seedKr1688.ts

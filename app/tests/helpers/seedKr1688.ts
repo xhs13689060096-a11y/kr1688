@@ -1,6 +1,12 @@
 import type { FullConfig } from '@playwright/test'
 import { getPayload } from 'payload'
 import config from '../../src/payload.config.js'
+import type { Chapter, Story } from '../../src/payload-types'
+
+export type SeededData = {
+  story: Story
+  chapter: Chapter
+}
 
 export const kr1688E2E = {
   prefix: 'kr1688-e2e-',
@@ -27,11 +33,13 @@ export async function seedKr1688TestData() {
     data: { titleAr: kr1688E2E.storyTitleAr, slug: kr1688E2E.storySlug, contentStatus: 'published', demoOnly: true, totalChapters: 1 },
     overrideAccess: true,
   })
-  await payload.create({
+  const chapter = await payload.create({
     collection: 'chapters',
     data: { titleAr: kr1688E2E.chapterTitleAr, slug: `${kr1688E2E.prefix}chapter-1`, chapterNumber: kr1688E2E.chapterNumber, story: story.id, status: 'published', demoOnly: true },
     overrideAccess: true,
   })
+
+  return { story, chapter }
 }
 
 export default async function globalSetup(_config: FullConfig) {

@@ -24,3 +24,9 @@ This is a demonstrated Playwright post-download installation blocker. The two pe
 minimal repairs are exhausted. A new Codex decision replaces the bundled-browser download
 with the Google Chrome preinstalled on the GitHub-hosted Ubuntu runner. A04 remains in
 progress; no A05 or security-baseline task may begin until its exact quality gate is green.
+
+## A04 replacement run
+
+- `a9769a3` / [31301127523](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301127523): `failure` (not accepted).
+- The preinstalled Chrome launched successfully; `generate:types`, lint and all 36 integration tests passed.
+- The two seeded story/chapter E2E tests failed because `seedKr1688TestData` did not return the created records. The minimal repair now returns them; a new full quality-gate run is required.
