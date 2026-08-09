@@ -54,6 +54,12 @@ test.describe('Frontend', () => {
     await expect(form).toBeAttached({ timeout: 15000 })
   })
 
+  test('reader login page is available in Arabic', async ({ page }) => {
+    await page.goto('http://localhost:3000/login')
+    await expect(page.getByLabel('البريد الإلكتروني')).toBeVisible()
+    await expect(page.getByLabel('كلمة المرور')).toBeVisible()
+  })
+
   test('/search route returns 404', async ({ page }) => {
     const response = await page.goto('http://localhost:3000/search')
     expect(response?.status()).toBe(404)
