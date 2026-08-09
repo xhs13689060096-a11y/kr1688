@@ -4,6 +4,8 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import config from '@/payload.config'
 import { Users } from '@/collections/Users'
 import { loadEnvironment } from '@/environment'
+import { getAdmin2FALaunchState } from '@/security/admin2fa'
+import { assertStateChangeAllowed } from '@/security/rateLimit'
 
 let payload: Payload
 
@@ -100,5 +102,20 @@ describe('C03 — runtime environment and API depth', () => {
   it('limits Payload API relation depth to two', async () => {
     const payloadConfig = await config
     expect(payloadConfig.maxDepth).toBe(2)
+  })
+})
+
+describe('C04 — rate-limit and administrator 2FA launch boundaries', () => {
+  it('fails closed when the login limiter is unavailable', () => {
+    expect(() =>
+      assertStateChangeAllowed({ category: 'login', allowed: false, reason: 'unavailable' }),
+    ).toThrow('login')
+  })
+
+  it('does not claim administrator 2FA is enabled', () => {
+    expect(getAdmin2FALaunchState()).toEqual({
+      requiredBeforePublicLaunch: true,
+      enabledInApplication: false,
+    })
   })
 })
