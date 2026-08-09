@@ -57,7 +57,7 @@ jobs:
       - name: Verify
         run: |
           cd app
-          pnpm verify:ci
+          pnpm nonexistent-command
         env:
           DATABASE_URL: postgresql://kr1688_test:kr1688_test@localhost:5432/kr1688_test
           PAYLOAD_SECRET: kr1688-ci-test-only-not-production
