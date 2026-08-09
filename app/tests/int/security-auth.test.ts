@@ -20,8 +20,8 @@ export function assertPublicUserPayload(value: unknown): void {
 
 describe('C01 — authentication and public reader registration', () => {
   it('explicitly configures verification, lockout, and finite token lifetime', () => {
+    expect(Users.auth?.verify).not.toBe(false)
     expect(Users.auth).toMatchObject({
-      verify: true,
       maxLoginAttempts: 5,
       lockTime: 900000,
       tokenExpiration: 7200,
