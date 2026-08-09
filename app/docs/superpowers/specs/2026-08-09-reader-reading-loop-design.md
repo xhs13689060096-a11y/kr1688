@@ -13,6 +13,7 @@ server actions, not a second backend or recommendation system.
 Included:
 
 - A reader account area with favorite stories and reading-progress entries.
+- A minimal reader login page backed by Payload's existing local-auth endpoint.
 - A visible “continue reading” action derived from the reader's latest progress.
 - A chapter reader action that persists progress only for the authenticated reader.
 - A favorite toggle that operates only on the authenticated reader's record.
@@ -35,7 +36,9 @@ current Payload user from the request. They call the existing `favorites`, `read
 and `comments` collections with `overrideAccess: false`; collection access rules remain the
 final authorization boundary.
 
-The account page reads only the current user's favorites and progress. It computes one
+The login page posts credentials only to Payload's same-origin `/api/users/login` endpoint,
+which owns the session cookie. It never stores a token in browser storage. The account page
+reads only the current user's favorites and progress. It computes one
 continue-reading card from the newest incomplete progress record. Story and chapter pages
 reuse existing public queries, then render account controls only when the request has a
 reader identity. Anonymous visitors can read published content but are prompted to sign in
@@ -77,11 +80,12 @@ integration tests, Chrome E2E tests, build, lint, and guardrails in GitHub Actio
 
 The implementation plan will use one sequential packet:
 
-1. Reader identity and account-page shell.
-2. Favorites and continue-reading UI backed by existing collection access.
-3. Progress capture and safe resume behavior.
-4. Pending-comment submission and reader feedback.
-5. RTL/accessibility/E2E acceptance and exact CI handoff.
+1. Minimal Payload-native reader login.
+2. Reader identity and account-page shell.
+3. Favorites and continue-reading UI backed by existing collection access.
+4. Progress capture and safe resume behavior.
+5. Pending-comment submission and reader feedback.
+6. RTL/accessibility/E2E acceptance and exact CI handoff.
 
 No step may introduce production infrastructure or expand into a recommendation, payment,
 author, or deployment system.

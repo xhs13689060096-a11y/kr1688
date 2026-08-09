@@ -23,11 +23,31 @@
 | File | Responsibility |
 |---|---|
 | `src/utilities/readerRequest.ts` | Authenticate a request and reject non-reader state changes. |
+| `src/app/(frontend)/login/page.tsx` | Payload-native reader login with no browser token storage. |
 | `src/app/api/reader/*/route.ts` | Favorite, progress, and pending-comment routes. |
 | `src/app/(frontend)/account/page.tsx` | RTL reader account: continue reading, favorites, empty states. |
 | `src/components/reader/*` | Accessible client controls with Arabic status messages. |
 | `tests/int/reader-loop.test.ts` | Local-API ownership and lifecycle proof. |
 | `tests/e2e/frontend.e2e.spec.ts` | Anonymous public reading and signed-in reader journey. |
+
+### Task D00: Minimal Payload-native reader login
+
+**Files:** Create `src/app/(frontend)/login/page.tsx`, `src/components/reader/LoginForm.tsx`; modify `tests/e2e/frontend.e2e.spec.ts`.
+
+**Interfaces:** The client posts `{ email, password }` only to same-origin `POST /api/users/login`; Payload sets its own HTTP-only session cookie. On success it navigates to `/account`.
+
+- [ ] **Step 1: Write failing E2E tests**: `/login` has Arabic email/password labels; incorrect credentials show a generic Arabic error; a seeded reader can sign in and reach `/account`.
+- [ ] **Step 2: Run RED**
+
+`pnpm test:e2e -- frontend.e2e.spec.ts --reporter=line`
+
+Expected: `/login` returns 404.
+
+- [ ] **Step 3: Implement minimum page/form**: render RTL email/password inputs; post to `/api/users/login` with same-origin credentials; redirect only on success; show `تعذر تسجيل الدخول` for every failure; never store a token.
+- [ ] **Step 4: Run GREEN** with the focused E2E command.
+- [ ] **Step 5: Commit and push**
+
+`git add app/src/app/'(frontend)'/login/page.tsx app/src/components/reader/LoginForm.tsx app/tests/e2e/frontend.e2e.spec.ts && git commit -m "feat: add reader login" && git push`
 
 ### Task D01: Reader request boundary and route contracts
 
