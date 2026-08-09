@@ -56,6 +56,13 @@ test.describe('Frontend', () => {
     await expect(page.getByRole('button', { name: 'إرسال للمراجعة' })).toBeVisible()
   })
 
+  test('chapter reader offers an explicit progress action', async ({ page }) => {
+    await page.goto(
+      `http://localhost:3000/stories/${seeded.story.slug}/chapters/${seeded.chapter.chapterNumber}`,
+    )
+    await expect(page.getByRole('button', { name: 'تمت قراءة الفصل' })).toBeVisible({ timeout: 15000 })
+  })
+
   test('admin login page is accessible', async ({ page }) => {
     await page.goto('http://localhost:3000/admin')
     const form = page.locator('form').first()

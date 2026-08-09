@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
 import { CommentForm } from '@/components/reader/CommentForm'
+import { ProgressButton } from '@/components/reader/ProgressButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -284,6 +285,9 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
               <p>محتوى الفصل غير متوفر.</p>
             </div>
           )}
+          <div className="mt-6">
+            <ProgressButton storyId={story.id} chapterId={chapter.id} />
+          </div>
         </div>
       </article>
 
