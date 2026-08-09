@@ -18,7 +18,7 @@ export async function createFavorite(context: ReaderRequestContext, storyId: num
     draft: false,
     req: context.req,
     overrideAccess: false,
-    data: { story: storyId },
+    data: { story: storyId, user: context.user.id },
   })
   return { favorited: true }
 }
