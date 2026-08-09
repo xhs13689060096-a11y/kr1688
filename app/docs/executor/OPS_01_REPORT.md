@@ -21,4 +21,6 @@ The full verifier cannot start because Playwright browser installation does not 
 - `4cb0761` / [31292436633](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31292436633): ran 30m16s; Chromium download completed, Playwright installation was automatically cancelled at the 30-minute job limit, and Verify was skipped.
 
 This is a demonstrated Playwright post-download installation blocker. The two permitted
-minimal repairs are exhausted. A04 remains blocked; no A05 or security-baseline task may begin.
+minimal repairs are exhausted. A new Codex decision replaces the bundled-browser download
+with the Google Chrome preinstalled on the GitHub-hosted Ubuntu runner. A04 remains in
+progress; no A05 or security-baseline task may begin until its exact quality gate is green.
