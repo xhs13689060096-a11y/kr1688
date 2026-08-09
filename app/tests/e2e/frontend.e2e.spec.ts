@@ -105,6 +105,17 @@ test.describe('Frontend', () => {
     )
 
     await page.goto(`http://localhost:3000/stories/${seeded.story.slug}/chapters/${seeded.chapter.chapterNumber}`)
+    const pendingComment = await page.evaluate(async ({ chapterId }) => {
+      const response = await fetch('/api/reader/comments', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ chapterId, body: 'تعليق قارئ للاختبار عبر الواجهة' }),
+      })
+      return { status: response.status, body: await response.json() }
+    }, { chapterId: seeded.chapter.id })
+    expect(pendingComment).toMatchObject({ status: 200, body: { status: 'pending' } })
+
     await page.getByLabel('أضف تعليقك').fill('تعليق قارئ للاختبار')
     await page.getByRole('button', { name: 'إرسال للمراجعة' }).click()
     await expect(page.getByRole('status')).toHaveText('سيظهر تعليقك بعد المراجعة')
