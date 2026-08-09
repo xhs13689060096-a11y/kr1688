@@ -3,9 +3,9 @@ phase: PHASE-2B-REPAIR-02
 state: in_progress
 next_task: A04
 branch: marvis/ops-01-automated-acceptance
-head_sha: null
-ci_url: null
-ci_conclusion: not_run
+head_sha: 1f7abd5e5aebbd9bbfd7db325a503b5bf29e868a
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289127215
+ci_conclusion: failure
 acceptance_requested: false
 updated: 2026-08-09
 source_of_truth: true
@@ -69,8 +69,9 @@ tasks:
         Payload v4 behavior changes (401→403, relation objects vs IDs, validation message format)
 
       REWORK (current):
-        Workflow simplified to single `pnpm verify:ci` step under PostgreSQL service.
-        verify:ci = generate:types && lint && test:int && test:e2e && build && guardrails
-        Awaiting user review before marking done.
+        Valid RED: 1f7abd5e5aebbd9bbfd7db325a503b5bf29e868a
+        https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31289127215
+        FAILURE as intended: `pnpm nonexistent-command` executed and exited 1.
+        Full verifier restore is pending; A04 remains doing until its exact SHA is green.
     changed_files:
       - .github/workflows/kr1688-quality.yml

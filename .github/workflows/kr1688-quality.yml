@@ -49,10 +49,15 @@ jobs:
           cd app
           pnpm install --frozen-lockfile
 
+      - name: Install Playwright
+        run: |
+          cd app
+          npx playwright install --with-deps chromium
+
       - name: Verify
         run: |
           cd app
-          pnpm nonexistent-command
+          pnpm verify:ci
         env:
           DATABASE_URL: postgresql://kr1688_test:kr1688_test@localhost:5432/kr1688_test
           PAYLOAD_SECRET: kr1688-ci-test-only-not-production
