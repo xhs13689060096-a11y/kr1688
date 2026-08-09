@@ -30,3 +30,8 @@ progress; no A05 or security-baseline task may begin until its exact quality gat
 - `a9769a3` / [31301127523](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301127523): `failure` (not accepted).
 - The preinstalled Chrome launched successfully; `generate:types`, lint and all 36 integration tests passed.
 - The two seeded story/chapter E2E tests failed because `seedKr1688TestData` did not return the created records. The minimal repair now returns them; a new full quality-gate run is required.
+
+## A04 green evidence
+
+- `d8e0f97` / [31301316528](https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301316528): `success`.
+- Node 26 and PostgreSQL completed type generation, lint, 36 integration tests, 7 Chrome E2E tests, build and guardrails with no skipped quality-gate stage.

@@ -1,11 +1,11 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
 state: in_progress
-next_task: A04
+next_task: A05
 branch: marvis/ops-01-automated-acceptance
-head_sha: 4cb0761fd24f09d35e1445fb79f35c9a187479d8
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31292436633
-ci_conclusion: cancelled
+head_sha: d8e0f976444468574bd9a94405c39ccdb86b2a3e
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301316528
+ci_conclusion: success
 acceptance_requested: false
 updated: 2026-08-09
 source_of_truth: true
@@ -51,8 +51,8 @@ tasks:
       - app/playwright.config.ts
 
   A04:
-    status: doing
-    head_sha: 4cb0761fd24f09d35e1445fb79f35c9a187479d8
+    status: done
+    head_sha: d8e0f976444468574bd9a94405c39ccdb86b2a3e
     result: |
       RED PHASE (036032f):
         SHA: 036032f93ef1890912a237aa6d20dd0b0908976c
@@ -80,8 +80,12 @@ tasks:
         FAILURE (not accepted): bundled-browser installation is resolved; generate:types,
         lint and all 36 integration tests passed, but two E2E routes failed because A03's
         seedKr1688TestData created story/chapter data without returning it to `seeded`.
-        Current minimal repair returns the created Story and Chapter; A04 remains doing
-        until its exact replacement verifier run is green.
+        The minimal repair returns the created Story and Chapter; the next full verifier
+        run provided the required green evidence.
+      GREEN: d8e0f976444468574bd9a94405c39ccdb86b2a3e
+        https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301316528
+        SUCCESS: Node 26 + PostgreSQL quality gate completed; type generation, lint,
+        36 integration tests, 7 Chrome E2E tests, build and guardrails all passed.
     changed_files:
       - .github/workflows/kr1688-quality.yml
       - app/playwright.config.ts
