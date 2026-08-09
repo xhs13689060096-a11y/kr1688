@@ -3,6 +3,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 import config from '@/payload.config'
 import { Users } from '@/collections/Users'
+import { loadEnvironment } from '@/environment'
 
 let payload: Payload
 
@@ -68,5 +69,36 @@ describe('C01 — authentication and public reader registration', () => {
     await expect(
       payload.login({ collection: 'users', data: { email, password } }),
     ).rejects.toThrow()
+  })
+})
+
+describe('C03 — runtime environment and API depth', () => {
+  it('rejects a production placeholder secret', () => {
+    expect(() => loadEnvironment({
+      NODE_ENV: 'production',
+      DATABASE_URL: 'postgresql://kr1688:kr1688@localhost:5432/kr1688',
+      PAYLOAD_SECRET: 'YOUR_SECRET_HERE',
+      NEXT_PUBLIC_SERVER_URL: 'https://stories.example.test',
+      CRON_SECRET: 'cron-secret',
+      PREVIEW_SECRET: 'preview-secret',
+    } as NodeJS.ProcessEnv)).toThrow('PAYLOAD_SECRET')
+  })
+
+  it('accepts a complete non-production test environment', () => {
+    const environment = loadEnvironment({
+      NODE_ENV: 'test',
+      DATABASE_URL: 'postgresql://kr1688:kr1688@localhost:5432/kr1688_test',
+      PAYLOAD_SECRET: 'kr1688-test-payload-secret',
+      NEXT_PUBLIC_SERVER_URL: 'http://127.0.0.1:3000',
+      CRON_SECRET: 'kr1688-test-cron-secret',
+      PREVIEW_SECRET: 'kr1688-test-preview-secret',
+    } as NodeJS.ProcessEnv)
+
+    expect(environment.databaseURL).toMatch(/^postgresql:\/\//)
+  })
+
+  it('limits Payload API relation depth to two', async () => {
+    const payloadConfig = await config
+    expect(payloadConfig.maxDepth).toBe(2)
   })
 })
