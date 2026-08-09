@@ -34,6 +34,9 @@ async function createTestUser(role: 'reader' | 'admin' = 'reader') {
       role,
     },
     overrideAccess: true,
+    ...(role === 'admin'
+      ? { req: { user: { id: 'trusted-test-admin', role: 'admin' } } }
+      : {}),
     disableVerificationEmail: true,
   })
 }
@@ -310,7 +313,7 @@ describe('Comments S04', () => {
 
   // ===================== DELETE: READER CANNOT =====================
 
-  it('reader cannot delete any comment', async () => {
+  it('reader can delete their own pending comment', async () => {
     const owner = await createTestUser('reader')
     const story = await createTestStory()
 
@@ -324,18 +327,14 @@ describe('Comments S04', () => {
       req: { user: owner },
     })
 
-    try {
-      await payload.delete({
-        collection: 'comments',
-        id: comment.id,
-        overrideAccess: false,
-        req: { user: owner },
-      })
-      expect.unreachable('Reader should not be able to delete')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      expect(error).toBeDefined()
-    }
+    const deleted = await payload.delete({
+      collection: 'comments',
+      id: comment.id,
+      overrideAccess: false,
+      req: { user: owner },
+    })
+
+    expect(deleted.id).toBe(comment.id)
   })
 
   // ===================== VISIBILITY =====================

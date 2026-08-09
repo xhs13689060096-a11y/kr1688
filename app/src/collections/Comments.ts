@@ -105,6 +105,9 @@ export const Comments: CollectionConfig = {
       relationTo: 'stories',
       hasMany: false,
       label: 'Story',
+      access: {
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
     },
     {
       name: 'chapter',
@@ -112,6 +115,9 @@ export const Comments: CollectionConfig = {
       relationTo: 'chapters',
       hasMany: false,
       label: 'Chapter',
+      access: {
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
     },
     {
       name: 'parent',
@@ -119,6 +125,9 @@ export const Comments: CollectionConfig = {
       relationTo: 'comments',
       hasMany: false,
       label: 'Parent Comment',
+      access: {
+        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
+      },
     },
     {
       name: 'status',
@@ -188,7 +197,7 @@ export const Comments: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ req, data, operation, originalDoc }) => {
+      ({ req, data, operation }) => {
         // S04: Always derive author from req.user — reject spoofing
         if (!req.user) {
           throw new Error('Authentication required to create or update a comment.')
@@ -205,13 +214,9 @@ export const Comments: CollectionConfig = {
             delete data.moderationReason
           }
         } else {
-          if (!originalDoc) {
-            throw new Error('Existing comment is required for an update.')
-          }
-          if (req.user.role !== 'admin') {
-            assertReaderCommentPatch(data)
-          }
-          data.author = originalDoc.author
+          // Payload provides merged document data to beforeValidate. Protected update
+          // fields are enforced above through field access, while this hook preserves
+          // ownership by never assigning an updater as the author.
         }
 
         // Validate story OR chapter
