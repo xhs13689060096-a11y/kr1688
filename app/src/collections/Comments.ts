@@ -2,6 +2,25 @@ import type { CollectionConfig, Where } from 'payload'
 
 import { authenticated } from '../access/authenticated'
 
+const readerForbiddenCommentFields = new Set([
+  'author',
+  'story',
+  'chapter',
+  'parent',
+  'status',
+  'moderationReason',
+  'likeCount',
+  'aiRecommendation',
+])
+
+export function assertReaderCommentPatch(data: Record<string, unknown>): void {
+  for (const field of readerForbiddenCommentFields) {
+    if (Object.hasOwn(data, field)) {
+      throw new Error(`Readers cannot update comment field: ${field}`)
+    }
+  }
+}
+
 /**
  * S04 — Secured Comments collection.
  *
@@ -44,7 +63,13 @@ export const Comments: CollectionConfig = {
     },
     delete: ({ req: { user } }) => {
       if (!user) return false
-      return Boolean(user.role === 'admin')
+      if (user.role === 'admin') return true
+      return {
+        and: [
+          { author: { equals: user.id } },
+          { status: { equals: 'pending' } },
+        ],
+      }
     },
   },
   admin: {
@@ -163,7 +188,7 @@ export const Comments: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      ({ req, data, operation }) => {
+      ({ req, data, operation, originalDoc }) => {
         // S04: Always derive author from req.user — reject spoofing
         if (!req.user) {
           throw new Error('Authentication required to create or update a comment.')
@@ -171,15 +196,22 @@ export const Comments: CollectionConfig = {
         if (!data) {
           throw new Error('No data provided for comment.')
         }
-        data.author = req.user.id
-
-        // S04: Reader always creates pending; cannot change status
-        if (req.user.role !== 'admin') {
-          data.status = 'pending'
-          // Strip admin-only fields if reader tries to set them
-          delete data.likeCount
-          delete data.aiRecommendation
-          delete data.moderationReason
+        if (operation === 'create') {
+          data.author = req.user.id
+          if (req.user.role !== 'admin') {
+            data.status = 'pending'
+            delete data.likeCount
+            delete data.aiRecommendation
+            delete data.moderationReason
+          }
+        } else {
+          if (!originalDoc) {
+            throw new Error('Existing comment is required for an update.')
+          }
+          if (req.user.role !== 'admin') {
+            assertReaderCommentPatch(data)
+          }
+          data.author = originalDoc.author
         }
 
         // Validate story OR chapter
@@ -198,6 +230,24 @@ export const Comments: CollectionConfig = {
               'A reply comment cannot be associated with a chapter. Use the parent comment context.',
             )
           }
+        }
+      },
+    ],
+    afterChange: [
+      ({ doc, operation, previousDoc, req }) => {
+        if (
+          operation === 'update'
+          && req.user?.role === 'admin'
+          && previousDoc.status !== doc.status
+        ) {
+          req.payload.logger.info({
+            msg: 'comment moderation transition',
+            actorId: req.user.id,
+            commentId: doc.id,
+            previousStatus: previousDoc.status,
+            nextStatus: doc.status,
+            reason: doc.moderationReason,
+          })
         }
       },
     ],

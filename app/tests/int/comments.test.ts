@@ -204,7 +204,7 @@ describe('Comments S04', () => {
 
   // ===================== ADMIN PRIVILEGES =====================
 
-  it('admin cannot update comment status (Payload v4)', async () => {
+  it('admin can approve a pending comment', async () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
@@ -220,23 +220,18 @@ describe('Comments S04', () => {
     })
     expect(comment.status).toBe('pending')
 
-    try {
-      await payload.update({
-        collection: 'comments',
-        id: comment.id,
-        data: { status: 'approved', moderationReason: 'Looks good.' },
-        overrideAccess: false,
-        req: { user: admin },
-      })
-      expect.unreachable('Admin should not be able to update comment status')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      expect(error).toBeDefined()
-      expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
-    }
+    const approved = await payload.update({
+      collection: 'comments',
+      id: comment.id,
+      data: { status: 'approved', moderationReason: 'Looks good.' },
+      overrideAccess: false,
+      req: { user: admin },
+    })
+
+    expect(approved.status).toBe('approved')
   })
 
-  it('admin cannot set likeCount (Payload v4)', async () => {
+  it('admin can set likeCount', async () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
@@ -251,23 +246,18 @@ describe('Comments S04', () => {
       req: { user: reader },
     })
 
-    try {
-      await payload.update({
-        collection: 'comments',
-        id: comment.id,
-        data: { likeCount: 42 },
-        overrideAccess: false,
-        req: { user: admin },
-      })
-      expect.unreachable('Admin should not be able to set likeCount')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      expect(error).toBeDefined()
-      expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
-    }
+    const updated = await payload.update({
+      collection: 'comments',
+      id: comment.id,
+      data: { likeCount: 42 },
+      overrideAccess: false,
+      req: { user: admin },
+    })
+
+    expect(updated.likeCount).toBe(42)
   })
 
-  it('admin cannot set aiRecommendation (Payload v4)', async () => {
+  it('admin can set aiRecommendation', async () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
@@ -282,23 +272,18 @@ describe('Comments S04', () => {
       req: { user: reader },
     })
 
-    try {
-      await payload.update({
-        collection: 'comments',
-        id: comment.id,
-        data: { aiRecommendation: 'approve' },
-        overrideAccess: false,
-        req: { user: admin },
-      })
-      expect.unreachable('Admin should not be able to set aiRecommendation')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      expect(error).toBeDefined()
-      expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
-    }
+    const updated = await payload.update({
+      collection: 'comments',
+      id: comment.id,
+      data: { aiRecommendation: 'approve' },
+      overrideAccess: false,
+      req: { user: admin },
+    })
+
+    expect(updated.aiRecommendation).toBe('approve')
   })
 
-  it('admin cannot delete any comment (Payload v4)', async () => {
+  it('admin can delete any comment', async () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
@@ -313,19 +298,14 @@ describe('Comments S04', () => {
       req: { user: reader },
     })
 
-    try {
-      await payload.delete({
-        collection: 'comments',
-        id: comment.id,
-        overrideAccess: false,
-        req: { user: admin },
-      })
-      expect.unreachable('Admin should not be able to delete any comment')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      expect(error).toBeDefined()
-      expect(error.status || error.statusCode).toBeGreaterThanOrEqual(400)
-    }
+    const deleted = await payload.delete({
+      collection: 'comments',
+      id: comment.id,
+      overrideAccess: false,
+      req: { user: admin },
+    })
+
+    expect(deleted.id).toBe(comment.id)
   })
 
   // ===================== DELETE: READER CANNOT =====================
