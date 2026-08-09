@@ -1,10 +1,10 @@
 packet_id: KR1688-EXECUTION-01-OPS-SECURITY
 phase: PHASE-2B-REPAIR-02
 state: in_progress
-next_task: C01
+next_task: C02
 branch: marvis/ops-01-automated-acceptance
-head_sha: bb6934b3d662cf4f3aeae947865528720f049897
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31301600185
+head_sha: 008bb6480c7ddd3fcba8b7d6c69bf4b5d4b03028
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31302491383
 ci_conclusion: success
 acceptance_requested: false
 updated: 2026-08-09
@@ -101,3 +101,18 @@ tasks:
       7 Chrome E2E tests, build and guardrails. No required test was skipped.
     changed_files:
       - app/docs/executor/STATUS.yaml
+
+  C01:
+    status: done
+    head_sha: 008bb6480c7ddd3fcba8b7d6c69bf4b5d4b03028
+    result: |
+      RED: 3a2a6fe0e859331ec2ae398ea2c32b814648c091
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31302050112
+      FAILURE as expected: verification was disabled and lockTime was 600000.
+      GREEN: 008bb6480c7ddd3fcba8b7d6c69bf4b5d4b03028
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31302491383
+      SUCCESS: explicit verification, five-attempt lockout, 15-minute lock window,
+      finite token lifetime, public reader-role denial and sensitive-field assertions passed.
+    changed_files:
+      - app/src/collections/Users/index.ts
+      - app/tests/int/security-auth.test.ts
