@@ -6,7 +6,7 @@ import { createPendingComment } from '@/utilities/readerComments'
 
 import { assertReaderRole, requireReader } from '@/utilities/readerRequest'
 import { createFavorite, removeFavorite } from '@/utilities/readerFavorites'
-import { validateProgressInput } from '@/utilities/readerProgress'
+import { saveProgress, validateProgressInput } from '@/utilities/readerProgress'
 
 describe('D01 — reader request boundary', () => {
   it('rejects an anonymous request without revealing authentication details', async () => {
@@ -24,6 +24,17 @@ describe('D03 — reader progress', () => {
   it('accepts only bounded integer progress values', () => {
     expect(() => validateProgressInput({ storyId: 1, chapterId: 2, progressPercentage: 100 })).not.toThrow()
     expect(() => validateProgressInput({ storyId: 1, chapterId: 2, progressPercentage: 101 })).toThrow('Invalid progress')
+  })
+
+  it('rejects a chapter that does not belong to the requested story', async () => {
+    const payload = await getPayload({ config })
+    const suffix = Date.now()
+    const reader = await payload.create({ collection: 'users', data: { email: `progress-reader-${suffix}@kr1688.test`, password: 'reader-progress-password', role: 'reader' }, disableVerificationEmail: true, overrideAccess: true })
+    const firstStory = await payload.create({ collection: 'stories', data: { titleAr: `القصة الأولى ${suffix}`, contentStatus: 'published', demoOnly: true }, overrideAccess: true })
+    const secondStory = await payload.create({ collection: 'stories', data: { titleAr: `القصة الثانية ${suffix}`, contentStatus: 'published', demoOnly: true }, overrideAccess: true })
+    const chapter = await payload.create({ collection: 'chapters', data: { titleAr: `فصل مختلف ${suffix}`, chapterNumber: 1, story: secondStory.id, status: 'published' }, overrideAccess: true })
+
+    await expect(saveProgress({ payload, req: { user: reader } as never, user: reader }, { storyId: firstStory.id, chapterId: chapter.id, progressPercentage: 50 })).rejects.toThrow('Invalid chapter progress')
   })
 })
 
