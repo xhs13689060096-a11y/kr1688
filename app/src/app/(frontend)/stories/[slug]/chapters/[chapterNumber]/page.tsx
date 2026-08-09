@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import React, { cache } from 'react'
 import RichText from '@/components/RichText'
+import { CommentForm } from '@/components/reader/CommentForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -377,6 +378,10 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
               ({comments.length})
             </span>
           </h2>
+
+          <div className="mb-6 rounded-lg border bg-card p-4">
+            <CommentForm chapterId={chapter.id} />
+          </div>
 
           {comments.length === 0 ? (
             <div className="text-center py-8 bg-card rounded-lg border">

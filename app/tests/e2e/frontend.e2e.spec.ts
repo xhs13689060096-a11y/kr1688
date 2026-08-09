@@ -48,6 +48,14 @@ test.describe('Frontend', () => {
     await expect(body).toContainText(seeded.chapter.titleAr, { timeout: 15000 })
   })
 
+  test('chapter reader offers a pending comment form', async ({ page }) => {
+    await page.goto(
+      `http://localhost:3000/stories/${seeded.story.slug}/chapters/${seeded.chapter.chapterNumber}`,
+    )
+    await expect(page.getByLabel('أضف تعليقك')).toBeVisible({ timeout: 15000 })
+    await expect(page.getByRole('button', { name: 'إرسال للمراجعة' })).toBeVisible()
+  })
+
   test('admin login page is accessible', async ({ page }) => {
     await page.goto('http://localhost:3000/admin')
     const form = page.locator('form').first()
