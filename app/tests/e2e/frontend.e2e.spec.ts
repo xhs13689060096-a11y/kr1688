@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test'
 import {
   seedKr1688TestData,
   cleanupKr1688TestData,
+  kr1688E2E,
   type SeededData,
 } from '../helpers/seedKr1688'
 
@@ -73,6 +74,40 @@ test.describe('Frontend', () => {
     await page.goto('http://localhost:3000/login')
     await expect(page.getByLabel('البريد الإلكتروني')).toBeVisible()
     await expect(page.getByLabel('كلمة المرور')).toBeVisible()
+  })
+
+  test('reader can complete the authenticated reading loop', async ({ page }) => {
+    await page.goto('http://localhost:3000/login')
+    await page.getByLabel('البريد الإلكتروني').fill(kr1688E2E.readerEmail)
+    await page.getByLabel('كلمة المرور').fill('kr1688-e2e-reader-only')
+    await page.getByRole('button', { name: 'تسجيل الدخول' }).click()
+    await expect(page).toHaveURL('http://localhost:3000/account')
+
+    await page.goto(`http://localhost:3000/stories/${seeded.story.slug}`)
+    await page.getByRole('button', { name: 'أضف إلى المفضلة' }).click()
+    await expect(page.getByRole('button', { name: 'إزالة من المفضلة' })).toBeVisible()
+
+    const savedProgress = await page.evaluate(async ({ storyId, chapterId }) => {
+      const response = await fetch('/api/reader/progress', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ storyId, chapterId, progressPercentage: 50 }),
+      })
+      return response.status
+    }, { storyId: seeded.story.id, chapterId: seeded.chapter.id })
+    expect(savedProgress).toBe(200)
+
+    await page.goto('http://localhost:3000/account')
+    await expect(page.getByRole('link', { name: 'متابعة القراءة' })).toHaveAttribute(
+      'href',
+      `/stories/${seeded.story.slug}/chapters/${seeded.chapter.chapterNumber}`,
+    )
+
+    await page.goto(`http://localhost:3000/stories/${seeded.story.slug}/chapters/${seeded.chapter.chapterNumber}`)
+    await page.getByLabel('أضف تعليقك').fill('تعليق قارئ للاختبار')
+    await page.getByRole('button', { name: 'إرسال للمراجعة' }).click()
+    await expect(page.getByRole('status')).toHaveText('سيظهر تعليقك بعد المراجعة')
   })
 
   test('/search route returns 404', async ({ page }) => {
