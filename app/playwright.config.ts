@@ -39,6 +39,9 @@ export default defineConfig({
   webServer: {
     command: 'pnpm build && pnpm start',
     env: {
+      // The e2e server is a disposable test process even though Next builds it
+      // with production optimizations. Keep runtime validation in test mode.
+      NODE_ENV: 'test',
       DATABASE_URL: process.env.DATABASE_URL ?? '',
       PAYLOAD_SECRET: process.env.PAYLOAD_SECRET ?? '',
       NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://127.0.0.1:3000',
