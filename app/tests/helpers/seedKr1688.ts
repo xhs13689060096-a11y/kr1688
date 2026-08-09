@@ -19,6 +19,13 @@ export const kr1688E2E = {
 
 export async function cleanupKr1688TestData() {
   const payload = await getPayload({ config })
+  const stories = await payload.find({ collection: 'stories', where: { slug: { like: `${kr1688E2E.prefix}%` } }, overrideAccess: true, limit: 100 })
+  const storyIds = stories.docs.map((story) => story.id)
+  if (storyIds.length > 0) {
+    await payload.delete({ collection: 'comments', where: { story: { in: storyIds } }, overrideAccess: true })
+    await payload.delete({ collection: 'favorites', where: { story: { in: storyIds } }, overrideAccess: true })
+    await payload.delete({ collection: 'reading-progress', where: { story: { in: storyIds } }, overrideAccess: true })
+  }
   await payload.delete({ collection: 'chapters', where: { slug: { like: `${kr1688E2E.prefix}%` } }, overrideAccess: true })
   await payload.delete({ collection: 'stories', where: { slug: { like: `${kr1688E2E.prefix}%` } }, overrideAccess: true })
   await payload.delete({ collection: 'users', where: { email: { equals: kr1688E2E.readerEmail } }, overrideAccess: true })
