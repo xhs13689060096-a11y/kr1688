@@ -119,6 +119,8 @@ test.describe('Frontend', () => {
     await page.getByLabel('أضف تعليقك').fill('تعليق قارئ للاختبار')
     await page.getByRole('button', { name: 'إرسال للمراجعة' }).click()
     await expect(page.getByRole('status')).toHaveText('سيظهر تعليقك بعد المراجعة')
+    await page.reload()
+    await expect(page.getByText('تعليق قارئ للاختبار')).toHaveCount(0)
   })
 
   test('/search route returns 404', async ({ page }) => {
