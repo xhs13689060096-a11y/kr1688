@@ -61,7 +61,7 @@ export const Comments: CollectionConfig = {
       // Reader: only own comments
       return { author: { equals: user.id } }
     },
-    delete: ({ req: { user } }) => {
+    delete: ({ req: { user } }): Where | boolean => {
       if (!user) return false
       if (user.role === 'admin') return true
       return {
