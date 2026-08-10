@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 
 import { Stories } from '@/collections/Stories'
 import config from '@/payload.config'
-import { createPendingComment } from '@/utilities/readerComments'
+import { createPublishedComment } from '@/utilities/readerComments'
 
 import { assertReaderRole, requireReader } from '@/utilities/readerRequest'
 import { createFavorite, removeFavorite } from '@/utilities/readerFavorites'
@@ -11,7 +11,11 @@ import { saveProgress, validateProgressInput } from '@/utilities/readerProgress'
 
 describe('E01 — operator publishing state', () => {
   it('offers only draft and published story choices', () => {
-    const tabs = (Stories.fields[0] as { tabs: { fields: { name?: string; options?: { value: string }[] }[] }[] }).tabs
+    const tabs = (
+      Stories.fields[0] as {
+        tabs: { fields: { name?: string; options?: { value: string }[] }[] }[]
+      }
+    ).tabs
     const field = tabs.flatMap((tab) => tab.fields).find((item) => item.name === 'contentStatus')
 
     expect(field?.options?.map((item) => item.value)).toEqual(['draft', 'published'])
@@ -32,19 +36,54 @@ describe('D01 — reader request boundary', () => {
 
 describe('D03 — reader progress', () => {
   it('accepts only bounded integer progress values', () => {
-    expect(() => validateProgressInput({ storyId: 1, chapterId: 2, progressPercentage: 100 })).not.toThrow()
-    expect(() => validateProgressInput({ storyId: 1, chapterId: 2, progressPercentage: 101 })).toThrow('Invalid progress')
+    expect(() =>
+      validateProgressInput({ storyId: 1, chapterId: 2, progressPercentage: 100 }),
+    ).not.toThrow()
+    expect(() =>
+      validateProgressInput({ storyId: 1, chapterId: 2, progressPercentage: 101 }),
+    ).toThrow('Invalid progress')
   })
 
   it('rejects a chapter that does not belong to the requested story', async () => {
     const payload = await getPayload({ config })
     const suffix = Date.now()
-    const reader = await payload.create({ collection: 'users', data: { email: `progress-reader-${suffix}@kr1688.test`, password: 'reader-progress-password', role: 'reader' }, disableVerificationEmail: true, overrideAccess: true })
-    const firstStory = await payload.create({ collection: 'stories', data: { titleAr: `القصة الأولى ${suffix}`, contentStatus: 'published', demoOnly: true }, overrideAccess: true })
-    const secondStory = await payload.create({ collection: 'stories', data: { titleAr: `القصة الثانية ${suffix}`, contentStatus: 'published', demoOnly: true }, overrideAccess: true })
-    const chapter = await payload.create({ collection: 'chapters', data: { titleAr: `فصل مختلف ${suffix}`, chapterNumber: 1, story: secondStory.id, status: 'published' }, overrideAccess: true })
+    const reader = await payload.create({
+      collection: 'users',
+      data: {
+        email: `progress-reader-${suffix}@kr1688.test`,
+        password: 'reader-progress-password',
+        role: 'reader',
+      },
+      disableVerificationEmail: true,
+      overrideAccess: true,
+    })
+    const firstStory = await payload.create({
+      collection: 'stories',
+      data: { titleAr: `القصة الأولى ${suffix}`, contentStatus: 'published', demoOnly: true },
+      overrideAccess: true,
+    })
+    const secondStory = await payload.create({
+      collection: 'stories',
+      data: { titleAr: `القصة الثانية ${suffix}`, contentStatus: 'published', demoOnly: true },
+      overrideAccess: true,
+    })
+    const chapter = await payload.create({
+      collection: 'chapters',
+      data: {
+        titleAr: `فصل مختلف ${suffix}`,
+        chapterNumber: 1,
+        story: secondStory.id,
+        status: 'published',
+      },
+      overrideAccess: true,
+    })
 
-    await expect(saveProgress({ payload, req: { user: reader } as never, user: reader }, { storyId: firstStory.id, chapterId: chapter.id, progressPercentage: 50 })).rejects.toThrow('Invalid chapter progress')
+    await expect(
+      saveProgress(
+        { payload, req: { user: reader } as never, user: reader },
+        { storyId: firstStory.id, chapterId: chapter.id, progressPercentage: 50 },
+      ),
+    ).rejects.toThrow('Invalid chapter progress')
   })
 })
 
@@ -55,13 +94,17 @@ describe('D02 — reader favorites', () => {
   })
 })
 
-describe('D04 — pending reader comments', () => {
-  it('derives the author and pending status through the server-only comment boundary', async () => {
+describe('D04 — immediately published reader comments', () => {
+  it('derives the author, publishes immediately, and exposes the comment to the public', async () => {
     const payload = await getPayload({ config })
     const suffix = Date.now()
     const reader = await payload.create({
       collection: 'users',
-      data: { email: `reader-comment-${suffix}@kr1688.test`, password: 'reader-comment-password', role: 'reader' },
+      data: {
+        email: `reader-comment-${suffix}@kr1688.test`,
+        password: 'reader-comment-password',
+        role: 'reader',
+      },
       disableVerificationEmail: true,
       overrideAccess: true,
     })
@@ -72,24 +115,126 @@ describe('D04 — pending reader comments', () => {
     })
     const chapter = await payload.create({
       collection: 'chapters',
-      data: { titleAr: `فصل تعليق ${suffix}`, chapterNumber: 1, story: story.id, status: 'published' },
+      data: {
+        titleAr: `فصل تعليق ${suffix}`,
+        chapterNumber: 1,
+        story: story.id,
+        status: 'published',
+      },
       overrideAccess: true,
     })
 
-    const comment = await createPendingComment({ payload, req: { user: reader } as never, user: reader }, { chapterId: chapter.id, body: 'تعليق قيد المراجعة' })
+    const comment = await createPublishedComment(
+      { payload, req: { user: reader } as never, user: reader },
+      { chapterId: chapter.id, body: 'تعليق ظاهر الآن' },
+    )
     const authorId = typeof comment.author === 'object' ? comment.author.id : comment.author
 
     expect(authorId).toBe(reader.id)
-    expect(comment.status).toBe('pending')
+    expect(comment.status).toBe('published')
+
+    const publicComments = await payload.find({
+      collection: 'comments',
+      where: {
+        chapter: { equals: chapter.id },
+        status: { equals: 'published' },
+      },
+      overrideAccess: false,
+    })
+    expect(publicComments.docs.map((item) => item.id)).toContain(comment.id)
+  })
+
+  it('removes a hidden comment from the unauthenticated chapter query', async () => {
+    const payload = await getPayload({ config })
+    const suffix = Date.now()
+    const reader = await payload.create({
+      collection: 'users',
+      data: {
+        email: `hidden-comment-reader-${suffix}@kr1688.test`,
+        password: 'reader-comment-password',
+        role: 'reader',
+      },
+      disableVerificationEmail: true,
+      overrideAccess: true,
+    })
+    const admin = await payload.create({
+      collection: 'users',
+      data: {
+        email: `hidden-comment-admin-${suffix}@kr1688.test`,
+        password: 'admin-comment-password',
+        role: 'admin',
+      },
+      disableVerificationEmail: true,
+      overrideAccess: true,
+    })
+    const story = await payload.create({
+      collection: 'stories',
+      data: { titleAr: `قصة إخفاء تعليق ${suffix}`, contentStatus: 'published', demoOnly: true },
+      overrideAccess: true,
+    })
+    const chapter = await payload.create({
+      collection: 'chapters',
+      data: {
+        titleAr: `فصل إخفاء تعليق ${suffix}`,
+        chapterNumber: 1,
+        story: story.id,
+        status: 'published',
+      },
+      overrideAccess: true,
+    })
+    const comment = await createPublishedComment(
+      { payload, req: { user: reader } as never, user: reader },
+      { chapterId: chapter.id, body: 'تعليق سيُخفى' },
+    )
+
+    await payload.update({
+      collection: 'comments',
+      id: comment.id,
+      data: { status: 'hidden' },
+      overrideAccess: false,
+      req: { user: admin } as never,
+    })
+
+    const publicComments = await payload.find({
+      collection: 'comments',
+      where: {
+        chapter: { equals: chapter.id },
+        status: { equals: 'published' },
+      },
+      overrideAccess: false,
+    })
+    expect(publicComments.docs.map((item) => item.id)).not.toContain(comment.id)
   })
 
   it('rejects a comment on a draft chapter', async () => {
     const payload = await getPayload({ config })
     const suffix = Date.now()
-    const reader = await payload.create({ collection: 'users', data: { email: `draft-comment-${suffix}@kr1688.test`, password: 'reader-comment-password', role: 'reader' }, disableVerificationEmail: true, overrideAccess: true })
-    const story = await payload.create({ collection: 'stories', data: { titleAr: `قصة مسودة ${suffix}`, contentStatus: 'draft', demoOnly: true }, overrideAccess: true })
-    const chapter = await payload.create({ collection: 'chapters', data: { titleAr: `فصل مسودة ${suffix}`, chapterNumber: 1, story: story.id, status: 'draft' }, overrideAccess: true })
+    const reader = await payload.create({
+      collection: 'users',
+      data: {
+        email: `draft-comment-${suffix}@kr1688.test`,
+        password: 'reader-comment-password',
+        role: 'reader',
+      },
+      disableVerificationEmail: true,
+      overrideAccess: true,
+    })
+    const story = await payload.create({
+      collection: 'stories',
+      data: { titleAr: `قصة مسودة ${suffix}`, contentStatus: 'draft', demoOnly: true },
+      overrideAccess: true,
+    })
+    const chapter = await payload.create({
+      collection: 'chapters',
+      data: { titleAr: `فصل مسودة ${suffix}`, chapterNumber: 1, story: story.id, status: 'draft' },
+      overrideAccess: true,
+    })
 
-    await expect(createPendingComment({ payload, req: { user: reader } as never, user: reader }, { chapterId: chapter.id, body: 'تعليق مرفوض' })).rejects.toThrow('Published chapter required')
+    await expect(
+      createPublishedComment(
+        { payload, req: { user: reader } as never, user: reader },
+        { chapterId: chapter.id, body: 'تعليق مرفوض' },
+      ),
+    ).rejects.toThrow('Published chapter required')
   })
 })

@@ -6,16 +6,16 @@ import { describe, it, beforeAll, expect } from 'vitest'
 let payload: Payload
 
 /**
- * KR1688 Phase 2B S04 — Comment authorization and moderation tests.
+ * KR1688 E02 — Comment authorization and immediate-publication tests.
  *
  * These tests require a running Payload instance with PostgreSQL.
  * Run with: pnpm test:int
  *
- * S04 requirements:
+ * E02 requirements:
  * - Author always from req.user.id (spoof blocked)
- * - Reader creates pending, can only mutate own body
- * - Only admin controls status, moderationReason, likeCount, aiRecommendation
- * - Public sees only approved; reader sees approved + own; admin sees all
+ * - Reader creates published, can only mutate own body
+ * - Only admin controls status and can hide a comment
+ * - Public sees only published comments
  * - Delete: admin only
  */
 
@@ -34,9 +34,7 @@ async function createTestUser(role: 'reader' | 'admin' = 'reader') {
       role,
     },
     overrideAccess: true,
-    ...(role === 'admin'
-      ? { req: { user: { id: 'trusted-test-admin', role: 'admin' } } }
-      : {}),
+    ...(role === 'admin' ? { req: { user: { id: 'trusted-test-admin', role: 'admin' } } } : {}),
     disableVerificationEmail: true,
   })
 }
@@ -83,10 +81,10 @@ function commentBody(text: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Comments — S04 Security
+// Comments — E02 Security
 // ---------------------------------------------------------------------------
 
-describe('Comments S04', () => {
+describe('Comments E02', () => {
   beforeAll(async () => {
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })
@@ -156,18 +154,20 @@ describe('Comments S04', () => {
       overrideAccess: false,
       req: { user: reader },
     })
-    expect(comment.status).toBe('pending')
+    expect(comment.status).toBe('published')
 
-    await expect(payload.update({
-      collection: 'comments',
-      id: comment.id,
-      data: {
-        body: commentBody('Trying to approve myself.'),
-        status: 'approved',
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })).rejects.toThrow('status')
+    await expect(
+      payload.update({
+        collection: 'comments',
+        id: comment.id,
+        data: {
+          body: commentBody('Trying to hide myself.'),
+          status: 'hidden',
+        },
+        overrideAccess: false,
+        req: { user: reader },
+      }),
+    ).rejects.toThrow('status')
   })
 
   it('reader cannot update another user comment', async () => {
@@ -196,7 +196,7 @@ describe('Comments S04', () => {
         req: { user: attacker },
       })
       expect.unreachable('Attacker should not be able to update')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
     }
@@ -204,7 +204,7 @@ describe('Comments S04', () => {
 
   // ===================== ADMIN PRIVILEGES =====================
 
-  it('admin can approve a pending comment', async () => {
+  it('admin can hide a published comment', async () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
@@ -212,75 +212,23 @@ describe('Comments S04', () => {
     const comment = await payload.create({
       collection: 'comments',
       data: {
-        body: commentBody('Pending for admin approval.'),
+        body: commentBody('Published before administrative hiding.'),
         story: story.id,
       },
       overrideAccess: false,
       req: { user: reader },
     })
-    expect(comment.status).toBe('pending')
+    expect(comment.status).toBe('published')
 
-    const approved = await payload.update({
+    const hidden = await payload.update({
       collection: 'comments',
       id: comment.id,
-      data: { status: 'approved', moderationReason: 'Looks good.' },
+      data: { status: 'hidden' },
       overrideAccess: false,
       req: { user: admin },
     })
 
-    expect(approved.status).toBe('approved')
-  })
-
-  it('admin can set likeCount', async () => {
-    const reader = await createTestUser('reader')
-    const admin = await createTestUser('admin')
-    const story = await createTestStory()
-
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('likeCount admin test.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
-
-    const updated = await payload.update({
-      collection: 'comments',
-      id: comment.id,
-      data: { likeCount: 42 },
-      overrideAccess: false,
-      req: { user: admin },
-    })
-
-    expect(updated.likeCount).toBe(42)
-  })
-
-  it('admin can set aiRecommendation', async () => {
-    const reader = await createTestUser('reader')
-    const admin = await createTestUser('admin')
-    const story = await createTestStory()
-
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('aiRecommendation admin test.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
-
-    const updated = await payload.update({
-      collection: 'comments',
-      id: comment.id,
-      data: { aiRecommendation: 'approve' },
-      overrideAccess: false,
-      req: { user: admin },
-    })
-
-    expect(updated.aiRecommendation).toBe('approve')
+    expect(hidden.status).toBe('hidden')
   })
 
   it('admin can delete any comment', async () => {
@@ -310,7 +258,7 @@ describe('Comments S04', () => {
 
   // ===================== DELETE: READER CANNOT =====================
 
-  it('reader can delete their own pending comment', async () => {
+  it('reader cannot delete their own published comment', async () => {
     const owner = await createTestUser('reader')
     const story = await createTestStory()
 
@@ -324,19 +272,19 @@ describe('Comments S04', () => {
       req: { user: owner },
     })
 
-    const deleted = await payload.delete({
-      collection: 'comments',
-      id: comment.id,
-      overrideAccess: false,
-      req: { user: owner },
-    })
-
-    expect(deleted.id).toBe(comment.id)
+    await expect(
+      payload.delete({
+        collection: 'comments',
+        id: comment.id,
+        overrideAccess: false,
+        req: { user: owner },
+      }),
+    ).rejects.toThrow()
   })
 
   // ===================== VISIBILITY =====================
 
-  it('unauthenticated query returns only approved comments', async () => {
+  it('unauthenticated query returns only published comments', async () => {
     const result = await payload.find({
       collection: 'comments',
       overrideAccess: false,
@@ -344,27 +292,25 @@ describe('Comments S04', () => {
     })
 
     for (const doc of result.docs) {
-      expect(doc.status).toBe('approved')
+      expect(doc.status).toBe('published')
     }
   })
 
-  it("reader sees approved comments plus their own pending ones", async () => {
+  it('reader sees their published comment', async () => {
     const reader = await createTestUser('reader')
     const story = await createTestStory()
 
-    // Create a pending comment as this reader
-    const pending = await payload.create({
+    const published = await payload.create({
       collection: 'comments',
       data: {
-        body: commentBody('My pending comment.'),
+        body: commentBody('My published comment.'),
         story: story.id,
       },
       overrideAccess: false,
       req: { user: reader },
     })
-    expect(pending.status).toBe('pending')
+    expect(published.status).toBe('published')
 
-    // Now find as the same reader — should see their own pending
     const result = await payload.find({
       collection: 'comments',
       overrideAccess: false,
@@ -373,7 +319,7 @@ describe('Comments S04', () => {
     })
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const myDoc = result.docs.find((d: any) => d.id === pending.id)
+    const myDoc = result.docs.find((d: any) => d.id === published.id)
     expect(myDoc).toBeDefined()
   })
 
@@ -392,7 +338,7 @@ describe('Comments S04', () => {
         req: { user: reader },
       })
       expect.unreachable('Validation should have thrown')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.message || '').toMatch(/story|chapter|must be associated/i)
@@ -427,7 +373,7 @@ describe('Comments S04', () => {
         req: { user: reader },
       })
       expect.unreachable('Reply with chapter should have thrown')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
       expect(error.message || '').toMatch(/reply|chapter|parent/i)
@@ -476,62 +422,67 @@ describe('Comments S04', () => {
         overrideAccess: false,
       })
       expect.unreachable('Unauthenticated create should have thrown')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
     }
   })
 })
 
-describe('C02 — comment ownership and moderation', () => {
+describe('C02 — comment ownership and immediate-publication safety', () => {
   beforeAll(async () => {
     const payloadConfig = await config
     payload = await getPayload({ config: payloadConfig })
   })
 
-  it('admin approval preserves the reader author', async () => {
+  it('admin hiding preserves the reader author', async () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
     const comment = await payload.create({
       collection: 'comments',
-      data: { body: commentBody('Pending reader comment.'), story: story.id },
+      data: { body: commentBody('Published reader comment.'), story: story.id },
       overrideAccess: false,
       req: { user: reader },
     })
 
-    const approved = await payload.update({
+    const hidden = await payload.update({
       collection: 'comments',
       id: comment.id,
-      data: { status: 'approved', moderationReason: 'Approved after review.' },
+      data: { status: 'hidden' },
       overrideAccess: true,
       req: { user: admin },
     })
 
-    const authorId = typeof approved.author === 'object' ? approved.author.id : approved.author
+    const authorId = typeof hidden.author === 'object' ? hidden.author.id : hidden.author
     expect(authorId).toBe(reader.id)
-    expect(approved.status).toBe('approved')
+    expect(hidden.status).toBe('hidden')
   })
 
-  it.each(['story', 'chapter', 'parent', 'author'])('reader cannot replace %s on an own comment', async (field) => {
-    const reader = await createTestUser('reader')
-    const otherReader = await createTestUser('reader')
-    const story = await createTestStory()
-    const otherStory = await createTestStory()
-    const comment = await payload.create({
-      collection: 'comments',
-      data: { body: commentBody('Protected relation comment.'), story: story.id },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+  it.each(['story', 'chapter', 'parent', 'author'])(
+    'reader cannot replace %s on an own comment',
+    async (field) => {
+      const reader = await createTestUser('reader')
+      const otherReader = await createTestUser('reader')
+      const story = await createTestStory()
+      const otherStory = await createTestStory()
+      const comment = await payload.create({
+        collection: 'comments',
+        data: { body: commentBody('Protected relation comment.'), story: story.id },
+        overrideAccess: false,
+        req: { user: reader },
+      })
 
-    const replacement = field === 'author' ? otherReader.id : otherStory.id
-    await expect(payload.update({
-      collection: 'comments',
-      id: comment.id,
-      data: { [field]: replacement },
-      overrideAccess: false,
-      req: { user: reader },
-    })).rejects.toThrow()
-  })
+      const replacement = field === 'author' ? otherReader.id : otherStory.id
+      await expect(
+        payload.update({
+          collection: 'comments',
+          id: comment.id,
+          data: { [field]: replacement },
+          overrideAccess: false,
+          req: { user: reader },
+        }),
+      ).rejects.toThrow()
+    },
+  )
 })
