@@ -1,12 +1,22 @@
 import { describe, expect, it } from 'vitest'
 import { getPayload } from 'payload'
 
+import { Stories } from '@/collections/Stories'
 import config from '@/payload.config'
 import { createPendingComment } from '@/utilities/readerComments'
 
 import { assertReaderRole, requireReader } from '@/utilities/readerRequest'
 import { createFavorite, removeFavorite } from '@/utilities/readerFavorites'
 import { saveProgress, validateProgressInput } from '@/utilities/readerProgress'
+
+describe('E01 — operator publishing state', () => {
+  it('offers only draft and published story choices', () => {
+    const tabs = (Stories.fields[0] as { tabs: { fields: { name?: string; options?: { value: string }[] }[] }[] }).tabs
+    const field = tabs.flatMap((tab) => tab.fields).find((item) => item.name === 'contentStatus')
+
+    expect(field?.options?.map((item) => item.value)).toEqual(['draft', 'published'])
+  })
+})
 
 describe('D01 — reader request boundary', () => {
   it('rejects an anonymous request without revealing authentication details', async () => {
