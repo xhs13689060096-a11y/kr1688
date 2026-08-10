@@ -95,11 +95,7 @@ async function seed() {
       tags: [{ tag: 'مغامرة' }, { tag: 'غموض' }, { tag: ' adventure ' }, { tag: ' mystery ' }],
       authorName: 'KR1688 Demo',
       genre: 'مغامرة وغموض',
-      riskLevel: 'none',
-      riskNotes: 'Demo seed data — no real content',
       contentStatus: 'draft',
-      editorialStatus: 'drafting',
-      rightsStatus: 'cleared',
       demoOnly: true,
     },
   })
