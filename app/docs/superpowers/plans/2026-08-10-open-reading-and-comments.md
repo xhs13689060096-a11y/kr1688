@@ -120,9 +120,18 @@ Also prove that an administrator changing the status to `hidden` removes it from
 
 - [ ] **Step 2: Run RED**
 
-Run: `pnpm test:int -- tests/int/reader-loop.test.ts tests/int/comments.test.ts --reporter=verbose && pnpm test:e2e -- frontend.e2e.spec.ts --reporter=line`
+First run `pnpm test:int -- tests/int/reader-loop.test.ts tests/int/comments.test.ts --reporter=verbose` locally only to record the known PostgreSQL diagnostic. Because this machine has no PostgreSQL, it cannot establish semantic RED.
 
-Expected: FAIL because readers are currently forced to `pending`, the endpoint returns `pending`, and the UI promises review.
+Then commit only the changed E02 tests, push that exact SHA, and wait for its GitHub Actions PostgreSQL quality run:
+
+```bash
+git add app/tests/int/reader-loop.test.ts app/tests/int/comments.test.ts app/tests/e2e/frontend.e2e.spec.ts
+git commit -m "test: prove immediate comments red"
+git push origin marvis/ops-01-automated-acceptance
+gh run list --branch marvis/ops-01-automated-acceptance --limit 1 --json headSha,conclusion,url
+```
+
+Expected: the exact test-only SHA fails because readers are forced to `pending`, the endpoint returns `pending`, and the UI promises review. Do not write production code until this remote RED evidence exists.
 
 - [ ] **Step 3: Write the smallest implementation**
 
