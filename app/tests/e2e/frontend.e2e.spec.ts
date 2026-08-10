@@ -85,6 +85,23 @@ test.describe('Frontend', () => {
     await page.getByRole('button', { name: 'تسجيل الدخول' }).click()
     await expect(page).toHaveURL('http://localhost:3000/account')
 
+    const protectedComment = await page.evaluate(
+      async ({ chapterId }) => {
+        const response = await fetch('/api/reader/comments', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ chapterId, body: 'تعليق بحالة محمية', status: 'hidden' }),
+        })
+        return { status: response.status, body: await response.json() }
+      },
+      { chapterId: seeded.chapter.id },
+    )
+    expect(protectedComment).toMatchObject({
+      status: 400,
+      body: { error: expect.stringContaining('status') },
+    })
+
     await page.goto(`http://localhost:3000/stories/${seeded.story.slug}`)
     await page.getByRole('button', { name: 'أضف إلى المفضلة' }).click()
     await expect(page.getByRole('button', { name: 'إزالة من المفضلة' })).toBeVisible()

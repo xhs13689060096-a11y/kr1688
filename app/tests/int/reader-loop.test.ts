@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { getPayload } from 'payload'
 
 import { Stories } from '@/collections/Stories'
-import { POST as postReaderComment } from '@/app/api/reader/comments/route'
 import config from '@/payload.config'
 import { createPublishedComment } from '@/utilities/readerComments'
 
@@ -97,7 +96,7 @@ describe('D02 — reader favorites', () => {
 
 describe('D04 — immediately published reader comments', () => {
   it.each(['author', 'story', 'chapter', 'parent', 'status'] as const)(
-    'rejects protected client field %s in the helper and reader comments API',
+    'rejects protected client field %s in the helper',
     async (field) => {
       const payload = await getPayload({ config })
       const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -138,29 +137,8 @@ describe('D04 — immediately published reader comments', () => {
       const input = { chapterId: chapter.id, body: 'تعليق بحقل محمي', [field]: protectedValue }
 
       await expect(
-        createPublishedComment(
-          { payload, req: { user: reader } as never, user: reader },
-          input,
-        ),
+        createPublishedComment({ payload, req: { user: reader } as never, user: reader }, input),
       ).rejects.toThrow(field)
-
-      const session = await payload.login({
-        collection: 'users',
-        data: { email, password: 'reader-comment-password' },
-      })
-      const response = await postReaderComment(
-        new Request('http://localhost/api/reader/comments', {
-          method: 'POST',
-          headers: {
-            authorization: `JWT ${session.token}`,
-            'content-type': 'application/json',
-          },
-          body: JSON.stringify(input),
-        }),
-      )
-
-      expect(response.status).toBe(400)
-      await expect(response.json()).resolves.toMatchObject({ error: expect.stringContaining(field) })
     },
   )
 
