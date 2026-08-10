@@ -33,7 +33,7 @@
 | `tests/e2e/frontend.e2e.spec.ts` | Visible-form submission and refresh proof. |
 | `docs/executor/STATUS.yaml` and `docs/executor/OPEN_READING_COMMENTS_REPORT.md` | Exact CI source of truth and final handoff. |
 
-### Task E01: Simplify operator publishing state
+### Task 1 (E01): Simplify operator publishing state
 
 **Files:**
 - Modify: `app/src/collections/Stories.ts:10-190`
@@ -88,7 +88,7 @@ git commit -m "feat: simplify story publication"
 git push origin marvis/ops-01-automated-acceptance
 ```
 
-### Task E02: Publish signed-in reader comments immediately
+### Task 2 (E02): Publish signed-in reader comments immediately
 
 **Files:**
 - Modify: `app/src/collections/Comments.ts:5-270`
@@ -151,7 +151,7 @@ git commit -m "feat: publish reader comments immediately"
 git push origin marvis/ops-01-automated-acceptance
 ```
 
-### Task E03: Exact-CI acceptance and truthful handoff
+### Task 3 (E03): Exact-CI acceptance and truthful handoff
 
 **Files:**
 - Modify: `app/docs/executor/STATUS.yaml`
