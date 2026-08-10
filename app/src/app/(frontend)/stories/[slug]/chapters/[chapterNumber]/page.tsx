@@ -25,10 +25,7 @@ const queryChapter = cache(async (slug: string, chapterNumber: number) => {
     limit: 1,
     overrideAccess: false,
     where: {
-      and: [
-        { slug: { equals: slug } },
-        { contentStatus: { equals: 'published' } },
-      ],
+      and: [{ slug: { equals: slug } }, { contentStatus: { equals: 'published' } }],
     },
   })
 
@@ -96,7 +93,7 @@ const queryAdjacentChapters = cache(async (storyId: number, currentChapterNumber
   }
 })
 
-const queryApprovedComments = cache(async (chapterId: number) => {
+const queryPublishedComments = cache(async (chapterId: number) => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
@@ -105,10 +102,7 @@ const queryApprovedComments = cache(async (chapterId: number) => {
     limit: 50,
     overrideAccess: false,
     where: {
-      and: [
-        { chapter: { equals: chapterId } },
-        { status: { equals: 'approved' } },
-      ],
+      and: [{ chapter: { equals: chapterId } }, { status: { equals: 'published' } }],
     },
     sort: '-createdAt',
   })
@@ -137,9 +131,9 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { prev, next } = await queryAdjacentChapters(story.id, num) as any
+  const { prev, next } = (await queryAdjacentChapters(story.id, num)) as any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const comments = await queryApprovedComments(chapter.id) as any[]
+  const comments = (await queryPublishedComments(chapter.id)) as any[]
 
   const bodyAr = chapter.bodyAr
   const chapterTitle = chapter.titleAr || `الفصل ${num}`
@@ -153,10 +147,7 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
       limit: 200,
       overrideAccess: false,
       where: {
-        and: [
-          { story: { equals: story.id } },
-          { status: { equals: 'published' } },
-        ],
+        and: [{ story: { equals: story.id } }, { status: { equals: 'published' } }],
       },
       select: { chapterNumber: true },
       sort: 'chapterNumber',
@@ -164,9 +155,7 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
   )
   const totalPublishedChapters = totalPublishedResult.totalDocs
   const progressPercent =
-    totalPublishedChapters > 0
-      ? Math.round((num / totalPublishedChapters) * 100)
-      : 0
+    totalPublishedChapters > 0 ? Math.round((num / totalPublishedChapters) * 100) : 0
 
   // Helper to render rich text as plain text for comments
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -175,11 +164,13 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
     try {
       const data = typeof body === 'string' ? JSON.parse(body) : body
       if (data?.root?.children) {
-        return data.root.children
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .map((p: any) => p.children?.map((c: any) => c.text || '').join('') || '')
-          .join(' ')
-          .trim()
+        return (
+          data.root.children
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((p: any) => p.children?.map((c: any) => c.text || '').join('') || '')
+            .join(' ')
+            .trim()
+        )
       }
     } catch {
       return ''
@@ -206,16 +197,11 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
             الرئيسية
           </Link>
           <span className="mx-2">/</span>
-          <Link
-            href={`/stories/${story.slug}`}
-            className="hover:text-foreground transition-colors"
-          >
+          <Link href={`/stories/${story.slug}`} className="hover:text-foreground transition-colors">
             {story.titleAr}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-foreground font-medium truncate">
-            {chapterTitle}
-          </span>
+          <span className="text-foreground font-medium truncate">{chapterTitle}</span>
         </nav>
       </div>
 
@@ -234,7 +220,12 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
                 viewBox="0 0 24 24"
                 style={{ transform: 'scaleX(-1)' }}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
               <span className="hidden sm:inline">الفصل السابق</span>
             </Link>
@@ -243,12 +234,8 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
           )}
 
           <div className="text-center">
-            <h1 className="text-xl md:text-2xl font-bold text-foreground">
-              {chapterTitle}
-            </h1>
-            {story.titleAr && (
-              <p className="text-sm text-muted-foreground mt-1">{story.titleAr}</p>
-            )}
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">{chapterTitle}</h1>
+            {story.titleAr && <p className="text-sm text-muted-foreground mt-1">{story.titleAr}</p>}
           </div>
 
           {next ? (
@@ -264,7 +251,12 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
                 viewBox="0 0 24 24"
                 style={{ transform: 'scaleX(-1)' }}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </Link>
           ) : (
@@ -307,7 +299,12 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
                   viewBox="0 0 24 24"
                   style={{ transform: 'scaleX(-1)' }}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
                 <div className="text-right">
                   <span className="text-xs text-muted-foreground block">الفصل السابق</span>
@@ -345,7 +342,12 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
                   viewBox="0 0 24 24"
                   style={{ transform: 'scaleX(-1)' }}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
                 </svg>
               </Link>
             ) : (
@@ -365,9 +367,7 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
             </span>
             {chapter.wordCount != null && <span>{chapter.wordCount} كلمة</span>}
             {chapter.publishedAt && (
-              <span>
-                نُشر في {new Date(chapter.publishedAt).toLocaleDateString('ar-SA')}
-              </span>
+              <span>نُشر في {new Date(chapter.publishedAt).toLocaleDateString('ar-SA')}</span>
             )}
           </div>
         </div>
@@ -395,10 +395,7 @@ export default async function ChapterReaderPage({ params: paramsPromise }: Args)
             <div className="space-y-4">
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {comments.map((comment: any) => (
-                <div
-                  key={comment.id}
-                  className="bg-card rounded-lg border p-4 space-y-2"
-                >
+                <div key={comment.id} className="bg-card rounded-lg border p-4 space-y-2">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-semibold">
                       {(comment.author?.name || comment.author?.email || '?')

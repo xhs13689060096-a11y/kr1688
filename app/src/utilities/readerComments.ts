@@ -1,17 +1,27 @@
 import type { Comment } from '@/payload-types'
 import type { ReaderRequestContext } from '@/utilities/readerRequest'
 
-type PendingCommentInput = {
+type PublishedCommentInput = {
   chapterId: unknown
   body: unknown
 }
 
-type PendingCommentData = Omit<Comment, 'id' | 'updatedAt' | 'createdAt' | 'author'>
+type PublishedCommentData = Omit<Comment, 'id' | 'updatedAt' | 'createdAt' | 'author'>
 
-export async function createPendingComment(context: ReaderRequestContext, input: PendingCommentInput) {
+export async function createPublishedComment(
+  context: ReaderRequestContext,
+  input: PublishedCommentInput,
+) {
   const chapterId = input.chapterId
   const body = input.body
-  if (typeof chapterId !== 'number' || !Number.isInteger(chapterId) || chapterId < 1 || typeof body !== 'string' || body.trim().length < 1 || body.trim().length > 2000) {
+  if (
+    typeof chapterId !== 'number' ||
+    !Number.isInteger(chapterId) ||
+    chapterId < 1 ||
+    typeof body !== 'string' ||
+    body.trim().length < 1 ||
+    body.trim().length > 2000
+  ) {
     throw new Error('Invalid comment')
   }
 
@@ -36,22 +46,34 @@ export async function createPendingComment(context: ReaderRequestContext, input:
   if (story.contentStatus !== 'published') {
     throw new Error('Published chapter required')
   }
-  const data: PendingCommentData = {
+  const data: PublishedCommentData = {
     story: story.id,
     chapter: chapter.id,
     body: {
       root: {
         type: 'root',
-        children: [{
-          type: 'paragraph',
-          children: [{ type: 'text', text: body.trim(), detail: 0, format: 0, mode: 'normal', style: '', version: 1 }],
-          direction: null,
-          format: '',
-          indent: 0,
-          textFormat: 0,
-          textStyle: '',
-          version: 1,
-        }],
+        children: [
+          {
+            type: 'paragraph',
+            children: [
+              {
+                type: 'text',
+                text: body.trim(),
+                detail: 0,
+                format: 0,
+                mode: 'normal',
+                style: '',
+                version: 1,
+              },
+            ],
+            direction: null,
+            format: '',
+            indent: 0,
+            textFormat: 0,
+            textStyle: '',
+            version: 1,
+          },
+        ],
         direction: null,
         format: '',
         indent: 0,
@@ -60,9 +82,10 @@ export async function createPendingComment(context: ReaderRequestContext, input:
     },
   }
 
-  // `author` is intentionally absent. The Comments beforeValidate hook derives it
-  // from context.req.user and forces pending status for readers. Payload's generated
-  // document type does not model that hook, so this is the sole typed boundary.
+  // `author` and `status` are intentionally absent. The Comments beforeValidate
+  // hook derives the author from context.req.user and publishes reader comments.
+  // Payload's generated document type does not model that hook, so this is the sole
+  // typed boundary.
   return (await context.payload.create({
     collection: 'comments',
     draft: false,

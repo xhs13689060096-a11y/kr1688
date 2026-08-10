@@ -2,16 +2,7 @@ import type { CollectionConfig, Where } from 'payload'
 
 import { authenticated } from '../access/authenticated'
 
-const readerForbiddenCommentFields = new Set([
-  'author',
-  'story',
-  'chapter',
-  'parent',
-  'status',
-  'moderationReason',
-  'likeCount',
-  'aiRecommendation',
-])
+const readerForbiddenCommentFields = new Set(['author', 'story', 'chapter', 'parent', 'status'])
 
 export function assertReaderCommentPatch(data: Record<string, unknown>): void {
   for (const field of readerForbiddenCommentFields) {
@@ -25,10 +16,9 @@ export function assertReaderCommentPatch(data: Record<string, unknown>): void {
  * S04 — Secured Comments collection.
  *
  * - Author always derived from req.user.id (anti-spoofing).
- * - Reader creates pending, only mutates own body.
- * - Only admin controls status, moderationReason, likeCount, aiRecommendation.
- * - Public (unauthenticated) sees only approved comments.
- * - Authenticated reader sees approved + their own.
+ * - Reader creates published comments and can only mutate own body.
+ * - Only administrators control comment visibility and deletion.
+ * - Public and readers see only published comments.
  * - Admin sees all.
  * - Single-level replies only (no nested replies beyond depth 1).
  */
@@ -43,17 +33,12 @@ export const Comments: CollectionConfig = {
     create: authenticated,
     read: ({ req: { user } }): Where | boolean => {
       if (!user) {
-        return { status: { equals: 'approved' } }
+        return { status: { equals: 'published' } }
       }
       if (user.role === 'admin') {
         return true
       }
-      return {
-        or: [
-          { status: { equals: 'approved' } },
-          { author: { equals: user.id } },
-        ],
-      }
+      return { status: { equals: 'published' } }
     },
     update: ({ req: { user } }) => {
       if (!user) return false
@@ -61,16 +46,7 @@ export const Comments: CollectionConfig = {
       // Reader: only own comments
       return { author: { equals: user.id } }
     },
-    delete: ({ req: { user } }): Where | boolean => {
-      if (!user) return false
-      if (user.role === 'admin') return true
-      return {
-        and: [
-          { author: { equals: user.id } },
-          { status: { equals: 'pending' } },
-        ],
-      }
-    },
+    delete: ({ req: { user } }): boolean => user?.role === 'admin',
   },
   admin: {
     useAsTitle: 'body',
@@ -133,12 +109,10 @@ export const Comments: CollectionConfig = {
       name: 'status',
       type: 'select',
       options: [
-        { label: 'Pending', value: 'pending' },
-        { label: 'Approved', value: 'approved' },
-        { label: 'Rejected', value: 'rejected' },
+        { label: 'Published', value: 'published' },
         { label: 'Hidden', value: 'hidden' },
       ],
-      defaultValue: 'pending',
+      defaultValue: 'published',
       label: 'Status',
       access: {
         create: () => false,
@@ -146,64 +120,16 @@ export const Comments: CollectionConfig = {
         update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
       },
     },
-    {
-      name: 'moderationReason',
-      type: 'textarea',
-      label: 'Moderation Reason',
-      access: {
-        create: () => false,
-        read: () => true,
-        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
-      },
-      admin: {
-        description: 'Reason for the moderation decision.',
-      },
-    },
-    {
-      name: 'likeCount',
-      type: 'number',
-      defaultValue: 0,
-      min: 0,
-      label: 'Like Count',
-      access: {
-        create: () => false,
-        read: () => true,
-        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
-      },
-      admin: {
-        readOnly: true,
-      },
-    },
-    {
-      name: 'aiRecommendation',
-      type: 'select',
-      options: [
-        { label: 'None', value: 'none' },
-        { label: 'Approve', value: 'approve' },
-        { label: 'Reject', value: 'reject' },
-        { label: 'Flag for Review', value: 'flag_review' },
-      ],
-      defaultValue: 'none',
-      label: 'AI Recommendation',
-      access: {
-        create: () => false,
-        read: () => true,
-        update: ({ req: { user } }) => Boolean(user?.role === 'admin'),
-      },
-      admin: {
-        readOnly: true,
-      },
-    },
   ],
   hooks: {
     beforeOperation: [
       ({ args, operation, req }) => {
         if (
-          operation === 'update'
-          && req.user?.role !== 'admin'
-          && args.data
-          && typeof args.data === 'object'
-          && !Array.isArray(args.data)
+          operation === 'update' &&
+          req.user?.role !== 'admin' &&
+          args.data &&
+          typeof args.data === 'object' &&
+          !Array.isArray(args.data)
         ) {
           assertReaderCommentPatch(args.data)
         }
@@ -223,10 +149,7 @@ export const Comments: CollectionConfig = {
         if (operation === 'create') {
           data.author = req.user.id
           if (req.user.role !== 'admin') {
-            data.status = 'pending'
-            delete data.likeCount
-            delete data.aiRecommendation
-            delete data.moderationReason
+            data.status = 'published'
           }
         } else {
           // Payload provides merged document data to beforeValidate. Protected update
@@ -237,9 +160,7 @@ export const Comments: CollectionConfig = {
         // Validate story OR chapter
         if (operation === 'create') {
           if (!data?.story && !data?.chapter) {
-            throw new Error(
-              'A comment must be associated with either a story or a chapter.',
-            )
+            throw new Error('A comment must be associated with either a story or a chapter.')
           }
         }
 
@@ -256,9 +177,9 @@ export const Comments: CollectionConfig = {
     afterChange: [
       ({ doc, operation, previousDoc, req }) => {
         if (
-          operation === 'update'
-          && req.user?.role === 'admin'
-          && previousDoc.status !== doc.status
+          operation === 'update' &&
+          req.user?.role === 'admin' &&
+          previousDoc.status !== doc.status
         ) {
           req.payload.logger.info({
             msg: 'comment moderation transition',
@@ -266,7 +187,6 @@ export const Comments: CollectionConfig = {
             commentId: doc.id,
             previousStatus: previousDoc.status,
             nextStatus: doc.status,
-            reason: doc.moderationReason,
           })
         }
       },

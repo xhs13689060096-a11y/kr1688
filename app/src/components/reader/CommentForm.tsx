@@ -27,7 +27,7 @@ export function CommentForm({ chapterId }: { chapterId: number }) {
       if (response.status === 401) return setNeedsLogin(true)
       if (!response.ok) throw new Error('comment failed')
       formElement.reset()
-      setMessage('سيظهر تعليقك بعد المراجعة')
+      setMessage('نُشر تعليقك')
     } catch {
       setMessage('تعذر إرسال التعليق')
     } finally {
@@ -35,14 +35,33 @@ export function CommentForm({ chapterId }: { chapterId: number }) {
     }
   }
 
-  if (needsLogin) return <Link className="text-sm text-primary underline" href="/login">سجّل الدخول لإضافة تعليق</Link>
+  if (needsLogin)
+    return (
+      <Link className="text-sm text-primary underline" href="/login">
+        سجّل الدخول لإضافة تعليق
+      </Link>
+    )
 
   return (
     <form className="space-y-3" onSubmit={onSubmit}>
-      <label className="block text-sm font-medium" htmlFor="comment-body">أضف تعليقك</label>
-      <textarea className="min-h-24 w-full rounded-md border bg-background p-3" id="comment-body" name="body" maxLength={2000} required />
-      {message && <p className="text-sm" role="status">{message}</p>}
-      <Button type="submit" disabled={submitting}>{submitting ? 'جارٍ الإرسال…' : 'إرسال للمراجعة'}</Button>
+      <label className="block text-sm font-medium" htmlFor="comment-body">
+        أضف تعليقك
+      </label>
+      <textarea
+        className="min-h-24 w-full rounded-md border bg-background p-3"
+        id="comment-body"
+        name="body"
+        maxLength={2000}
+        required
+      />
+      {message && (
+        <p className="text-sm" role="status">
+          {message}
+        </p>
+      )}
+      <Button type="submit" disabled={submitting}>
+        {submitting ? 'جارٍ الإرسال…' : 'نشر التعليق'}
+      </Button>
     </form>
   )
 }
