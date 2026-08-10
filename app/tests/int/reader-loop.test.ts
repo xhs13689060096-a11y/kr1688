@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { getPayload } from 'payload'
 
 import { Stories } from '@/collections/Stories'
+import { POST as postReaderComment } from '@/app/api/reader/comments/route'
 import config from '@/payload.config'
 import { createPublishedComment } from '@/utilities/readerComments'
 
@@ -95,6 +96,74 @@ describe('D02 — reader favorites', () => {
 })
 
 describe('D04 — immediately published reader comments', () => {
+  it.each(['author', 'story', 'chapter', 'parent', 'status'] as const)(
+    'rejects protected client field %s in the helper and reader comments API',
+    async (field) => {
+      const payload = await getPayload({ config })
+      const suffix = `${Date.now()}-${Math.random().toString(16).slice(2)}`
+      const email = `protected-comment-${suffix}@kr1688.test`
+      const reader = await payload.create({
+        collection: 'users',
+        data: {
+          email,
+          password: 'reader-comment-password',
+          role: 'reader',
+          _verified: true,
+        },
+        disableVerificationEmail: true,
+        overrideAccess: true,
+      })
+      const story = await payload.create({
+        collection: 'stories',
+        data: { titleAr: `قصة حقول محمية ${suffix}`, contentStatus: 'published', demoOnly: true },
+        overrideAccess: true,
+      })
+      const chapter = await payload.create({
+        collection: 'chapters',
+        data: {
+          titleAr: `فصل حقول محمية ${suffix}`,
+          chapterNumber: 1,
+          story: story.id,
+          status: 'published',
+        },
+        overrideAccess: true,
+      })
+      const protectedValue = {
+        author: reader.id,
+        story: story.id,
+        chapter: chapter.id,
+        parent: 1,
+        status: 'hidden',
+      }[field]
+      const input = { chapterId: chapter.id, body: 'تعليق بحقل محمي', [field]: protectedValue }
+
+      await expect(
+        createPublishedComment(
+          { payload, req: { user: reader } as never, user: reader },
+          input,
+        ),
+      ).rejects.toThrow(field)
+
+      const session = await payload.login({
+        collection: 'users',
+        data: { email, password: 'reader-comment-password' },
+      })
+      const response = await postReaderComment(
+        new Request('http://localhost/api/reader/comments', {
+          method: 'POST',
+          headers: {
+            authorization: `JWT ${session.token}`,
+            'content-type': 'application/json',
+          },
+          body: JSON.stringify(input),
+        }),
+      )
+
+      expect(response.status).toBe(400)
+      await expect(response.json()).resolves.toMatchObject({ error: expect.stringContaining(field) })
+    },
+  )
+
   it('derives the author, publishes immediately, and exposes the comment to the public', async () => {
     const payload = await getPayload({ config })
     const suffix = Date.now()
@@ -200,7 +269,6 @@ describe('D04 — immediately published reader comments', () => {
       collection: 'comments',
       where: {
         chapter: { equals: chapter.id },
-        status: { equals: 'published' },
       },
       overrideAccess: false,
     })

@@ -8,10 +8,32 @@ type PublishedCommentInput = {
 
 type PublishedCommentData = Omit<Comment, 'id' | 'updatedAt' | 'createdAt' | 'author'>
 
+const protectedReaderCommentInputFields = ['author', 'story', 'chapter', 'parent', 'status'] as const
+const allowedReaderCommentInputFields = new Set(['chapterId', 'body'])
+
+function assertPublishedCommentInput(input: unknown): asserts input is PublishedCommentInput {
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    throw new Error('Invalid comment')
+  }
+
+  for (const field of protectedReaderCommentInputFields) {
+    if (Object.hasOwn(input, field)) {
+      throw new Error(`Readers cannot provide comment field: ${field}`)
+    }
+  }
+
+  for (const field of Object.keys(input)) {
+    if (!allowedReaderCommentInputFields.has(field)) {
+      throw new Error('Invalid comment')
+    }
+  }
+}
+
 export async function createPublishedComment(
   context: ReaderRequestContext,
-  input: PublishedCommentInput,
+  input: unknown,
 ) {
+  assertPublishedCommentInput(input)
   const chapterId = input.chapterId
   const body = input.body
   if (
