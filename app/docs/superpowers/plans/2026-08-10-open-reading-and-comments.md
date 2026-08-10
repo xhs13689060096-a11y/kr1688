@@ -202,3 +202,58 @@ Wait for the exact documentation commit's CI result, then stop for product accep
 - Coverage: E01 removes the multi-stage internal publishing process; E02 implements immediate logged-in comments and reactive hiding; E03 requires exact CI evidence.
 - Scope: no anonymous posts, legal/religious policy layer, external service, deployment, Phase 3A, or excluded product area appears.
 - Consistency: public pages, reader helper, API response, UI copy, integration tests, and E2E all use the shared `published` comment state.
+
+### Task 4 (E04): Close the generic comment-create bypass
+
+**Files:**
+- Modify: `app/src/collections/Comments.ts`
+- Modify: `app/src/utilities/readerComments.ts`
+- Modify: `app/tests/int/comments.test.ts`
+- Modify: `app/tests/int/reader-loop.test.ts`
+- Modify: `app/docs/executor/STATUS.yaml`
+
+**Interfaces:**
+- Consumes: `createPublishedComment(context, { chapterId, body })` and Payload local API `context`.
+- Produces: generic reader `POST /api/comments` creation is denied; the helper alone supplies `{ readerCommentCreation: true }` in server-only Payload context after it derives a published chapter and story.
+
+- [ ] **Step 1: Write failing integration tests**
+
+```ts
+await expect(payload.create({
+  collection: 'comments',
+  data: { body: commentBody('bypass'), story: draftStory.id, chapter: draftChapter.id },
+  req: { user: reader },
+  overrideAccess: false,
+})).rejects.toThrow()
+
+await expect(createPublishedComment(readerContext, { chapterId: publishedChapter.id, body: 'allowed' }))
+  .resolves.toMatchObject({ status: 'published' })
+```
+
+Also prove a reader cannot create a generic comment for a published but mismatched story/chapter pair, while an admin remains able to use internal comment management.
+
+- [ ] **Step 2: Run RED**
+
+Run: `pnpm test:int -- tests/int/comments.test.ts tests/int/reader-loop.test.ts --reporter=verbose`, then push the test-only SHA for GitHub PostgreSQL RED when local PostgreSQL is unavailable.
+
+Expected: generic reader creation incorrectly succeeds before the access boundary exists.
+
+- [ ] **Step 3: Implement the smallest server-only creation capability**
+
+```ts
+const readerCommentCreationContext = { readerCommentCreation: true }
+
+// Comments.access.create
+if (req.user?.role === 'admin') return true
+return req.user?.role === 'reader' && req.context.readerCommentCreation === true
+
+// createPublishedComment local API call
+context: readerCommentCreationContext,
+```
+
+Keep generic REST requests unable to provide this local API context. Do not accept story,
+chapter, parent, author, or status from the reader helper input.
+
+- [ ] **Step 4: Run GREEN, commit, push, and verify exact CI**
+
+Run the focused tests locally as diagnostic, then require the pushed GREEN SHA to pass the full GitHub Actions PostgreSQL quality gate. Update `STATUS.yaml` only with actual SHA, URL, and conclusion.

@@ -1,14 +1,20 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-2D-READER-LOOP
-state: acceptance_requested
-next_task: product_acceptance
+state: doing
+next_task: E02-security-boundary-repair
 branch: marvis/ops-01-automated-acceptance
 head_sha: 139819f02aecf03913d82e8df7eceebab4a33e43
 evaluation_sha: 139819f02aecf03913d82e8df7eceebab4a33e43
 ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31383110330
 ci_conclusion: success
-acceptance_requested: true
-acceptance_status: pending_product_acceptance
+acceptance_requested: false
+acceptance_status: returned_for_security_repair
+review_blocker: |
+  Final whole-branch review found that authenticated readers can bypass
+  /api/reader/comments through Payload's generic /api/comments create endpoint,
+  supply story/chapter/parent fields, and immediately publish a comment. The
+  collection must deny generic reader creation and permit only the server-side
+  published-comment helper after it derives a published chapter and story.
 updated: 2026-08-10
 source_of_truth: true
 
