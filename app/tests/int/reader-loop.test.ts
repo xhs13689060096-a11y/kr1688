@@ -166,6 +166,7 @@ describe('D04 — immediately published reader comments', () => {
       },
       disableVerificationEmail: true,
       overrideAccess: true,
+      req: { user: { id: 'e02-test-admin', role: 'admin' } } as never,
     })
     const story = await payload.create({
       collection: 'stories',
