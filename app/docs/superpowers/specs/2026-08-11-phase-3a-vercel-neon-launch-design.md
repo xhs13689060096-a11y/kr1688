@@ -19,10 +19,13 @@ to `https://www.kr1688.com` permanently redirect to it.
 ## Deployment design
 
 Create a distinct Vercel project for the accepted repository branch
-`marvis/ops-01-automated-acceptance`. Its first deployment is a Vercel preview
-and must pass the existing quality gate plus browser smoke checks before either
-production alias moves. The project uses the repository `app/` directory as its
-root and Node.js 24, matching the existing Vercel account project runtime.
+`marvis/ops-01-automated-acceptance`. Its first deployment is a production
+candidate on the project's generated Vercel hostname, not on either KR1688
+domain. It uses the approved production Neon database for a tightly scoped
+smoke check and must pass the existing quality gate plus browser smoke checks
+before either production alias moves. The project is deployed from the
+repository `app/` directory and uses Node.js 24, matching the existing Vercel
+account project runtime.
 
 The initial production deployment is promoted only after the deployment has
 valid production environment variables and the database schema initializes
@@ -41,19 +44,22 @@ Production-only Vercel environment variables are:
 | `PREVIEW_SECRET` | Generated locally at configuration time | Added directly to Vercel without logging its value. |
 | `NEXT_PUBLIC_SERVER_URL` | `https://kr1688.com` | Non-secret production setting. |
 
-Preview deployments receive separate non-production secret values and a preview
-URL. They do not use the production Neon database unless the owner explicitly
-creates and assigns a separate Neon branch/connection later.
+No preview database is available in the current Neon project. The isolated
+Vercel-hostname candidate therefore uses the Production environment and Neon
+connection only after all five required variables are present. Its smoke check
+creates only the normal minimal reader/story/chapter/comment test data and is
+performed before either public KR1688 domain is moved.
 
 ## Domain cutover and retirement
 
-1. Add both domains to the new Vercel project and obtain Vercel's exact DNS
-   requirements without changing DNS yet.
-2. Validate the preview deployment: anonymous public reading, reader login,
+1. Validate the isolated Vercel-hostname candidate: anonymous public reading, reader login,
    favorite/progress/comment flows, and Payload admin login.
-3. Change the Cloudflare DNS records to the exact Vercel values for the new
-   project. Configure Vercel so `kr1688.com` is canonical and `www.kr1688.com`
-   redirects permanently to it.
+2. Reassign both Vercel aliases in a single recorded cutover after the candidate
+   passes. This is the actual routing switch; if the post-cutover checks fail,
+   reassign both aliases immediately back to `kr1688-site`.
+3. Change Cloudflare only if Vercel reports that the existing records do not
+   satisfy the new project, then configure `www.kr1688.com` to redirect
+   permanently to `kr1688.com`.
 4. Verify the live apex and `www` redirect with HTTPS, then retain a short
    recorded rollback window.
 5. Delete Vercel project `kr1688-site` only after the new canonical site is

@@ -4,7 +4,7 @@
 
 **Goal:** Replace the retired `kr1688-site` production deployment with the accepted KR1688 story platform at `https://kr1688.com` without exposing database credentials or causing an avoidable outage.
 
-**Architecture:** A new Vercel project hosts the current accepted execution branch with `app/` as the project root. Neon supplies the production PostgreSQL connection only through Vercel Production environment variables. After a healthy Vercel deployment is verified, Cloudflare DNS directs both hostnames to the new project and Vercel redirects `www` to the apex; only then is the old project deleted.
+**Architecture:** A new Vercel project hosts the current accepted execution branch from `app/`. Neon supplies the production PostgreSQL connection only through Vercel Production environment variables. The first deployment is tested at its generated Vercel hostname; after it is healthy, Vercel reassigns both hostnames atomically and supports immediate reassignment rollback before the old project is deleted.
 
 **Tech Stack:** Next.js 16, Payload CMS 4, PostgreSQL 18 on Neon, Vercel Node.js 24 runtime, Cloudflare DNS.
 
@@ -16,6 +16,7 @@
 - Canonical URL is `https://kr1688.com`; `https://www.kr1688.com` must redirect permanently.
 - Do not alter Cloudflare DNS or delete `kr1688-site` until the new deployment has passed all documented smoke checks.
 - Exact GitHub Actions success is necessary but production readiness also requires a successful Vercel deployment and live HTTPS checks.
+- Every Vercel CLI deployment and link command uses `--cwd app`; repository-root deployment is forbidden.
 
 ---
 
@@ -46,11 +47,11 @@ Run: `vercel project add kr1688-reader`
 
 Expected: Vercel reports a newly created `kr1688-reader` project in the authenticated account. If it already exists, inspect it and continue only if it has no production aliases and is not linked to unrelated code.
 
-- [ ] **Step 3: Link only this checkout and configure the root directory**
+- [ ] **Step 3: Link the actual application directory**
 
-Run: `vercel link --yes --project kr1688-reader && vercel project inspect kr1688-reader`
+Run: `vercel link --cwd app --yes --project kr1688-reader && vercel project inspect kr1688-reader`
 
-Expected: the local `.vercel/project.json` identifies `kr1688-reader`; dashboard/CLI settings show `app` as the Root Directory and Node.js 24.x.
+Expected: `app/.vercel/project.json` identifies `kr1688-reader`; all later deployment commands use `--cwd app`, so no repository-root deployment can occur.
 
 - [ ] **Step 4: Verify the project has no production domain aliases**
 
@@ -110,7 +111,7 @@ Expected: the status contains only variable names and readiness result, not valu
 
 **Consumes:** Task 2's complete Production environment and the accepted branch.
 
-**Produces:** a deployment URL with a healthy Payload app connected to the owner-configured Neon database.
+**Produces:** a generated Vercel-hostname production candidate with a healthy Payload app connected to the owner-configured Neon database.
 
 - [ ] **Step 1: Establish the failing precondition check**
 
@@ -120,9 +121,9 @@ Expected: if any of the five variable names is absent, do not run deployment; re
 
 - [ ] **Step 2: Deploy the accepted branch as a Vercel production candidate**
 
-Run: `vercel deploy --prod --yes`
+Run: `vercel --cwd app deploy --prod --yes`
 
-Expected: Vercel reports a unique deployment URL for `kr1688-reader`; it is not yet assigned `kr1688.com` or `www.kr1688.com`.
+Expected: Vercel reports a unique `kr1688-reader` deployment URL; it is not yet assigned `kr1688.com` or `www.kr1688.com`.
 
 - [ ] **Step 3: Run public and authenticated smoke checks**
 
@@ -158,17 +159,17 @@ Run: `vercel inspect <deployment-url>` and `vercel inspect https://kr1688-site.v
 
 Expected: the candidate is Ready and the old project still owns the production aliases; if candidate is not Ready, stop without changing DNS.
 
-- [ ] **Step 2: Add domains to the new Vercel project and record exact DNS requirements**
+- [ ] **Step 2: Execute the atomic project-domain reassignment**
 
-Run: `vercel domains add kr1688.com kr1688-reader` and `vercel domains add www.kr1688.com kr1688-reader`
+Run: `vercel domains add kr1688.com kr1688-reader --force` and `vercel domains add www.kr1688.com kr1688-reader --force`
 
-Expected: Vercel reports the required apex and `www` DNS records. Do not delete the old project yet.
+Expected: Vercel reassigns both aliases from `kr1688-site` to `kr1688-reader` and reports any required DNS records. This is the production routing cutover. Do not delete the old project yet.
 
 - [ ] **Step 3: Apply Cloudflare DNS change and canonical redirect**
 
-Action: replace only the exact old Vercel DNS records with the exact Vercel values reported in Step 2; configure Vercel domain settings to redirect `www.kr1688.com` permanently to `kr1688.com`.
+Action: preserve existing Cloudflare records if Vercel reports they are valid; otherwise replace only the exact records Vercel reports as invalid. Configure Vercel domain settings to redirect `www.kr1688.com` permanently to `kr1688.com`.
 
-Expected: `curl -I https://kr1688.com` returns HTTPS success and `curl -I https://www.kr1688.com` returns a permanent redirect to `https://kr1688.com`.
+Expected: `curl -I https://kr1688.com` returns HTTPS success and `curl -I https://www.kr1688.com` returns a permanent redirect to `https://kr1688.com`. If either check fails, immediately run `vercel domains add kr1688.com kr1688-site --force` and `vercel domains add www.kr1688.com kr1688-site --force`, then record the rollback.
 
 - [ ] **Step 4: Execute post-cutover smoke checks**
 
