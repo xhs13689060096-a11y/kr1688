@@ -1,5 +1,6 @@
 import { getPayload, Payload } from 'payload'
 import config from '@/payload.config'
+import { createPublishedComment } from '@/utilities/readerComments'
 
 import { describe, it, beforeAll, expect } from 'vitest'
 
@@ -46,7 +47,7 @@ async function createTestStory() {
     data: {
       titleAr: `قصة تعليقات ${ts}`,
       demoOnly: true,
-      contentStatus: 'draft',
+      contentStatus: 'published',
     },
     overrideAccess: true,
   })
@@ -60,9 +61,22 @@ async function createTestChapter(storyId: string | number) {
       titleAr: `الفصل ${ts}`,
       chapterNumber: 1,
       story: storyId,
+      status: 'published',
     },
     overrideAccess: true,
   })
+}
+
+async function createReaderComment(
+  reader: Awaited<ReturnType<typeof createTestUser>>,
+  story: Awaited<ReturnType<typeof createTestStory>>,
+  body: string,
+) {
+  const chapter = await createTestChapter(story.id)
+  return createPublishedComment(
+    { payload, req: { user: reader } as never, user: reader },
+    { chapterId: chapter.id, body },
+  )
 }
 
 /** Build a minimal richText body for a comment. */
@@ -92,24 +106,46 @@ describe('Comments E02', () => {
 
   // ===================== AUTHOR SPOOFING =====================
 
-  it('always derives author from req.user even if spoofed author is sent', async () => {
+  it('denies generic reader comment creation even when the request supplies an author', async () => {
     const reader = await createTestUser('reader')
     const otherUser = await createTestUser('reader')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Spoofed author attempt.'),
-        author: otherUser.id, // Try to impersonate
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const chapter = await createTestChapter(story.id)
 
-    const cmtAuthorId = typeof comment.author === 'object' ? comment.author.id : comment.author
-    expect(cmtAuthorId).toBe(reader.id)
+    await expect(
+      payload.create({
+        collection: 'comments',
+        data: {
+          body: commentBody('Spoofed author attempt.'),
+          author: otherUser.id,
+          story: story.id,
+          chapter: chapter.id,
+        },
+        overrideAccess: false,
+        req: { user: reader },
+      }),
+    ).rejects.toThrow()
+  })
+
+  it('denies a generic reader comment with a mismatched story and chapter', async () => {
+    const reader = await createTestUser('reader')
+    const story = await createTestStory()
+    const otherStory = await createTestStory()
+    const otherChapter = await createTestChapter(otherStory.id)
+
+    await expect(
+      payload.create({
+        collection: 'comments',
+        data: {
+          body: commentBody('Mismatched generic comment attempt.'),
+          story: story.id,
+          chapter: otherChapter.id,
+        },
+        overrideAccess: false,
+        req: { user: reader },
+      }),
+    ).rejects.toThrow()
   })
 
   // ===================== READER CAN ONLY MUTATE BODY =====================
@@ -118,15 +154,7 @@ describe('Comments E02', () => {
     const reader = await createTestUser('reader')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Original body.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const comment = await createReaderComment(reader, story, 'Original body.')
 
     const updated = await payload.update({
       collection: 'comments',
@@ -145,15 +173,7 @@ describe('Comments E02', () => {
     const reader = await createTestUser('reader')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Status spoof attempt.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const comment = await createReaderComment(reader, story, 'Status spoof attempt.')
     expect(comment.status).toBe('published')
 
     await expect(
@@ -175,15 +195,7 @@ describe('Comments E02', () => {
     const attacker = await createTestUser('reader')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Owner comment.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: owner },
-    })
+    const comment = await createReaderComment(owner, story, 'Owner comment.')
 
     try {
       await payload.update({
@@ -209,15 +221,11 @@ describe('Comments E02', () => {
     const admin = await createTestUser('admin')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Published before administrative hiding.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const comment = await createReaderComment(
+      reader,
+      story,
+      'Published before administrative hiding.',
+    )
     expect(comment.status).toBe('published')
 
     const hidden = await payload.update({
@@ -236,15 +244,7 @@ describe('Comments E02', () => {
     const admin = await createTestUser('admin')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('To be deleted by admin.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const comment = await createReaderComment(reader, story, 'To be deleted by admin.')
 
     const deleted = await payload.delete({
       collection: 'comments',
@@ -262,15 +262,7 @@ describe('Comments E02', () => {
     const owner = await createTestUser('reader')
     const story = await createTestStory()
 
-    const comment = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Reader cannot delete.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: owner },
-    })
+    const comment = await createReaderComment(owner, story, 'Reader cannot delete.')
 
     await expect(
       payload.delete({
@@ -300,15 +292,7 @@ describe('Comments E02', () => {
     const reader = await createTestUser('reader')
     const story = await createTestStory()
 
-    const published = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('My published comment.'),
-        story: story.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const published = await createReaderComment(reader, story, 'My published comment.')
     expect(published.status).toBe('published')
 
     const result = await payload.find({
@@ -325,7 +309,7 @@ describe('Comments E02', () => {
 
   // ===================== VALIDATION =====================
 
-  it('comment without story or chapter fails validation', async () => {
+  it('generic reader creation is denied before relation validation', async () => {
     const reader = await createTestUser('reader')
 
     try {
@@ -341,12 +325,13 @@ describe('Comments E02', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
-      expect(error.message || '').toMatch(/story|chapter|must be associated/i)
+      expect(error).toBeDefined()
     }
   })
 
-  it('reply cannot be associated with a chapter', async () => {
+  it('reader cannot create a generic reply associated with a chapter', async () => {
     const reader = await createTestUser('reader')
+    const admin = await createTestUser('admin')
     const story = await createTestStory()
     const chapter = await createTestChapter(story.id)
 
@@ -357,7 +342,7 @@ describe('Comments E02', () => {
         story: story.id,
       },
       overrideAccess: false,
-      req: { user: reader },
+      req: { user: admin },
     })
 
     try {
@@ -376,12 +361,13 @@ describe('Comments E02', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       expect(error).toBeDefined()
-      expect(error.message || '').toMatch(/reply|chapter|parent/i)
+      expect(error).toBeDefined()
     }
   })
 
-  it('authenticated reader can create a reply to another comment', async () => {
+  it('reader cannot create a generic reply to another comment', async () => {
     const reader = await createTestUser('reader')
+    const admin = await createTestUser('admin')
     const story = await createTestStory()
 
     const parent = await payload.create({
@@ -391,22 +377,21 @@ describe('Comments E02', () => {
         story: story.id,
       },
       overrideAccess: false,
-      req: { user: reader },
+      req: { user: admin },
     })
 
-    const reply = await payload.create({
-      collection: 'comments',
-      data: {
-        body: commentBody('Reply to parent.'),
-        story: story.id,
-        parent: parent.id,
-      },
-      overrideAccess: false,
-      req: { user: reader },
-    })
-
-    const replyParentId = typeof reply.parent === 'object' ? reply.parent.id : reply.parent
-    expect(replyParentId).toBe(parent.id)
+    await expect(
+      payload.create({
+        collection: 'comments',
+        data: {
+          body: commentBody('Reply to parent.'),
+          story: story.id,
+          parent: parent.id,
+        },
+        overrideAccess: false,
+        req: { user: reader },
+      }),
+    ).rejects.toThrow()
   })
 
   // ===================== UNAUTHENTICATED =====================
@@ -439,12 +424,7 @@ describe('C02 — comment ownership and immediate-publication safety', () => {
     const reader = await createTestUser('reader')
     const admin = await createTestUser('admin')
     const story = await createTestStory()
-    const comment = await payload.create({
-      collection: 'comments',
-      data: { body: commentBody('Published reader comment.'), story: story.id },
-      overrideAccess: false,
-      req: { user: reader },
-    })
+    const comment = await createReaderComment(reader, story, 'Published reader comment.')
 
     const hidden = await payload.update({
       collection: 'comments',
@@ -466,12 +446,7 @@ describe('C02 — comment ownership and immediate-publication safety', () => {
       const otherReader = await createTestUser('reader')
       const story = await createTestStory()
       const otherStory = await createTestStory()
-      const comment = await payload.create({
-        collection: 'comments',
-        data: { body: commentBody('Protected relation comment.'), story: story.id },
-        overrideAccess: false,
-        req: { user: reader },
-      })
+      const comment = await createReaderComment(reader, story, 'Protected relation comment.')
 
       const replacement = field === 'author' ? otherReader.id : otherStory.id
       await expect(
