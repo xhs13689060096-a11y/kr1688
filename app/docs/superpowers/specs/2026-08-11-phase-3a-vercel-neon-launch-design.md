@@ -28,9 +28,12 @@ repository `app/` directory and uses Node.js 24, matching the existing Vercel
 account project runtime.
 
 The initial production deployment is promoted only after the deployment has
-valid production environment variables and the database schema initializes
-against the Neon connection. No connection string is committed, printed, or
-sent through chat.
+valid production environment variables and an explicit Payload migration has
+initialized the Neon schema. Production must not rely on Drizzle development
+push mode. The Vercel build runs pending migrations before the Next.js build;
+if either step fails, Vercel rejects the candidate and the public aliases remain
+on the retired project. No connection string is committed, printed, or sent
+through chat.
 
 ## Secret and environment design
 
@@ -49,6 +52,17 @@ Vercel-hostname candidate therefore uses the Production environment and Neon
 connection only after all five required variables are present. Its smoke check
 creates only the normal minimal reader/story/chapter/comment test data and is
 performed before either public KR1688 domain is moved.
+
+## Production schema design
+
+- Commit an initial Payload PostgreSQL migration generated from the accepted
+  configuration without connecting to or changing the production database.
+- Add a dedicated `vercel-build` command that runs `payload migrate` before the
+  normal production build.
+- Exercise the same migration on GitHub Actions' disposable PostgreSQL service
+  before accepting the deployment commit.
+- Never use `migrate:fresh`, `migrate:reset`, or development push mode against
+  Neon production. A failed migration blocks deployment and domain cutover.
 
 ## Domain cutover and retirement
 

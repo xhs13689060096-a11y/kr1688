@@ -1,10 +1,10 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-3A-VERCEL-NEON-LAUNCH
 state: doing
-next_task: P3A02-configure-secret-safe-vercel-environments
+next_task: P3A03-create-and-verify-production-migration
 branch: marvis/ops-01-automated-acceptance
-head_sha: e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
-evaluation_sha: e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
+head_sha: ccd7533f9301c53e8fef62f9c9b84d00f04f5d64
+evaluation_sha: ccd7533f9301c53e8fef62f9c9b84d00f04f5d64
 ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31474692185
 ci_conclusion: success
 acceptance_requested: false
@@ -345,3 +345,19 @@ tasks:
       deployment, domain/DNS change, old-project action, or secret value access occurred.
     changed_files:
       - app/docs/executor/STATUS.yaml
+
+  P3A02:
+    status: done
+    result: |
+      Vercel CLI name-only verification confirmed the isolated kr1688-reader
+      Production environment contains exactly DATABASE_URL, PAYLOAD_SECRET,
+      CRON_SECRET, PREVIEW_SECRET, and NEXT_PUBLIC_SERVER_URL. DATABASE_URL was
+      transferred from the owner's clipboard directly to Vercel as Sensitive;
+      no value was printed, written to the repository, or sent through chat.
+      Provider documentation review found that Payload PostgreSQL production
+      requires explicit migrations, so deployment remains blocked until P3A03
+      creates and verifies the initial migration on disposable PostgreSQL.
+    changed_files:
+      - app/docs/executor/STATUS.yaml
+      - app/docs/superpowers/specs/2026-08-11-phase-3a-vercel-neon-launch-design.md
+      - app/docs/superpowers/plans/2026-08-11-phase-3a-vercel-neon-launch.md
