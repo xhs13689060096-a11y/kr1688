@@ -1,14 +1,14 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-2D-READER-LOOP
-state: doing
-next_task: E06-final-independent-review
+state: accepted
+next_task: "STOP — Phase 2D accepted; await user direction"
 branch: marvis/ops-01-automated-acceptance
 head_sha: e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
 evaluation_sha: e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
 ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31474692185
 ci_conclusion: success
-acceptance_requested: false
-acceptance_status: pending_final_review
+acceptance_requested: true
+acceptance_status: approved
 review_blocker: none
 updated: 2026-08-11
 source_of_truth: true
@@ -315,3 +315,16 @@ tasks:
       - app/src/app/(payload)/layout.tsx
       - app/src/components/PayloadAdminRouter.tsx
       - app/tests/int/content-access.test.ts
+
+  E06_final_review:
+    status: approved
+    reviewer: independent_phase2d_final_review
+    reviewed_head_sha: 0c37cfb58ada691eac560734b24888d8765f6872
+    result: |
+      Independent final review approved with no Critical, Important, or Minor findings.
+      It verified the restored Payload RootLayout provider chain, the explicit no-Google-Fonts
+      configuration, the required Next router/server adapters, all six reader story/chapter
+      write denials, and no scope expansion. Core repair CI e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
+      (run 31474692185) and documentation HEAD CI 0c37cfb58ada691eac560734b24888d8765f6872
+      (run 31475165539) both succeeded with 67 integration tests, 11 Chrome E2E tests,
+      build and guardrails. Stop here; do not enter Phase 3A, deploy, merge, or modify main.
