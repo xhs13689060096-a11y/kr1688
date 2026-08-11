@@ -1,19 +1,15 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-2D-READER-LOOP
 state: doing
-next_task: E05-content-access-boundary-repair
+next_task: E05-final-acceptance-review
 branch: marvis/ops-01-automated-acceptance
-head_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
-evaluation_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464529539
+head_sha: d80e054f31f811073eca7aa08cd57e0ec8e28289
+evaluation_sha: d80e054f31f811073eca7aa08cd57e0ec8e28289
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31465993624
 ci_conclusion: success
 acceptance_requested: false
-acceptance_status: returned_for_content_access_repair
-review_blocker: |
-  Final Phase 2D review found readers can create, update, and delete stories and chapters
-  through generic Payload APIs, and non-admin reads expose draft stories, archived chapters,
-  and published chapters belonging to draft stories. E05 must enforce administrator-only
-  content writes and published story/chapter-only non-admin reads before acceptance.
+acceptance_status: pending_final_review
+review_blocker: none
 updated: 2026-08-11
 source_of_truth: true
 
@@ -259,12 +255,32 @@ tasks:
       - app/tests/int/comments.test.ts
 
   E05:
-    status: doing
+    status: done
+    head_sha: d80e054f31f811073eca7aa08cd57e0ec8e28289
+    evaluation_ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31465993624
+    evaluation_ci_conclusion: success
     result: |
-      Final Phase 2D review returned the packet for content access repair. The approved
-      minimal design and execution plan are in docs/superpowers; no E05 production change
-      has been made yet. Exact E04 documentation evidence remains de03b2b3bab1372f97fac2f4602018b7eeae0c0b
-      (https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464906823, SUCCESS).
+      RED: b8d86a7c6f5ec7e0fcd514f559e2558e8e879912
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31465586800
+      FAILURE as expected: a reader could create stories through the generic API and
+      non-admin story reads exposed drafts. The focused integration suite also asserts
+      archived chapters and chapters of draft stories remain hidden.
+      Repair 1: 2da123f153ed8df95b9bb0a13dee4d9c13056f30
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31465782002
+      FAILURE: the new access filter correctly hid draft chapters, while the existing
+      comment helper exposed Payload's Not Found instead of its established generic
+      Published chapter required response.
+      GREEN: d80e054f31f811073eca7aa08cd57e0ec8e28289
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31465993624
+      SUCCESS: PostgreSQL 16 quality gate completed type generation, lint (2 warnings,
+      0 errors), 67 integration tests, 11 Chrome E2E tests, build and guardrails.
+      Stories and chapters are now administrator-only for create, update and delete;
+      non-admins can read only published stories and published chapters whose related
+      story is also published. The comment helper preserves its opaque published-content
+      response without bypassing access checks. Local PostgreSQL absence remains
+      diagnostic only, not passing evidence.
     changed_files:
-      - app/docs/superpowers/specs/2026-08-11-content-access-boundary-design.md
-      - app/docs/superpowers/plans/2026-08-11-content-access-boundary.md
+      - app/src/collections/Stories.ts
+      - app/src/collections/Chapters.ts
+      - app/src/utilities/readerComments.ts
+      - app/tests/int/content-access.test.ts
