@@ -13,7 +13,7 @@
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
     "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
     "lint:fix": "cross-env NODE_OPTIONS=--no-deprecation eslint . --fix",
-    "verify:ci": "pnpm generate:types && pnpm lint && pnpm test:int && pnpm test:e2e && pnpm build && node scripts/verify-guardrails.mjs",
+    "verify:ci": "pnpm generate:types && pnpm lint && pnpm payload migrate && pnpm exec vitest run tests/int/production-migration.test.ts --config vitest.config.mts && pnpm test:int && pnpm test:e2e && pnpm build && node scripts/verify-guardrails.mjs",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "reinstall": "cross-env NODE_OPTIONS=--no-deprecation rm -rf node_modules && rm pnpm-lock.yaml && pnpm --ignore-workspace install",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
