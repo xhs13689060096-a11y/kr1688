@@ -1,7 +1,7 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-3A-VERCEL-NEON-LAUNCH
 state: doing
-next_task: P3A01-create-isolated-vercel-project
+next_task: P3A02-configure-secret-safe-vercel-environments
 branch: marvis/ops-01-automated-acceptance
 head_sha: e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
 evaluation_sha: e87b8c62eec1b5ecd68f322956d8b8f959f6aadb
@@ -328,3 +328,20 @@ tasks:
       (run 31474692185) and documentation HEAD CI 0c37cfb58ada691eac560734b24888d8765f6872
       (run 31475165539) both succeeded with 67 integration tests, 11 Chrome E2E tests,
       build and guardrails. Stop here; do not enter Phase 3A, deploy, merge, or modify main.
+
+  P3A01:
+    status: done
+    result: |
+      Retired-project safety check: `vercel inspect https://kr1688-site.vercel.app`
+      reported Ready and listed both https://kr1688.com and https://www.kr1688.com
+      as aliases of kr1688-site.
+      Created isolated Vercel project kr1688-reader in jt6kbggd86-3765s-projects:
+      project ID prj_4qZdeJTXzfo1bGrDwK98IgmPWoqF. The approved app-only link completed
+      with `vercel link --cwd app --yes --team jt6kbggd86-3765s-projects --project
+      kr1688-reader`; app/.vercel/project.json identifies kr1688-reader.
+      `vercel domains ls` listed only pawlang.com, kr1688.com, and pvsize.com in the
+      account; it listed no www domain entry. Together with the retired-project inspect,
+      this records that neither production alias was assigned to kr1688-reader. No
+      deployment, domain/DNS change, old-project action, or secret value access occurred.
+    changed_files:
+      - app/docs/executor/STATUS.yaml
