@@ -7,10 +7,18 @@ export const Stories: CollectionConfig = {
     plural: 'Stories',
   },
   access: {
-    create: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
-    read: () => true,
-    update: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user?.role === 'admin',
+    delete: ({ req: { user } }) => user?.role === 'admin',
+    read: ({ req: { user } }) => {
+      if (user?.role === 'admin') return true
+
+      return {
+        contentStatus: {
+          equals: 'published',
+        },
+      }
+    },
+    update: ({ req: { user } }) => user?.role === 'admin',
   },
   admin: {
     useAsTitle: 'titleAr',

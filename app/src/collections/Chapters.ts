@@ -7,18 +7,27 @@ export const Chapters: CollectionConfig = {
     plural: 'Chapters',
   },
   access: {
-    create: ({ req: { user } }) => Boolean(user),
-    delete: ({ req: { user } }) => Boolean(user),
+    create: ({ req: { user } }) => user?.role === 'admin',
+    delete: ({ req: { user } }) => user?.role === 'admin',
     read: ({ req: { user } }) => {
-      // Public read: hide chapters whose status is 'draft'
-      if (user) return true
+      if (user?.role === 'admin') return true
+
       return {
-        status: {
-          not_equals: 'draft',
-        },
+        and: [
+          {
+            status: {
+              equals: 'published',
+            },
+          },
+          {
+            'story.contentStatus': {
+              equals: 'published',
+            },
+          },
+        ],
       }
     },
-    update: ({ req: { user } }) => Boolean(user),
+    update: ({ req: { user } }) => user?.role === 'admin',
   },
   admin: {
     useAsTitle: 'titleAr',
