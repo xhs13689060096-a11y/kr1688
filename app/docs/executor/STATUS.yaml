@@ -1,21 +1,16 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-2D-READER-LOOP
 state: doing
-next_task: E02-security-boundary-repair
+next_task: E04-final-acceptance-review
 branch: marvis/ops-01-automated-acceptance
-head_sha: 139819f02aecf03913d82e8df7eceebab4a33e43
-evaluation_sha: 139819f02aecf03913d82e8df7eceebab4a33e43
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31383110330
+head_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
+evaluation_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464529539
 ci_conclusion: success
 acceptance_requested: false
-acceptance_status: returned_for_security_repair
-review_blocker: |
-  Final whole-branch review found that authenticated readers can bypass
-  /api/reader/comments through Payload's generic /api/comments create endpoint,
-  supply story/chapter/parent fields, and immediately publish a comment. The
-  collection must deny generic reader creation and permit only the server-side
-  published-comment helper after it derives a published chapter and story.
-updated: 2026-08-10
+acceptance_status: E04_verified_pending_phase_acceptance
+review_blocker: null
+updated: 2026-08-11
 source_of_truth: true
 
 tasks:
@@ -236,3 +231,25 @@ tasks:
     changed_files:
       - app/docs/executor/STATUS.yaml
       - app/docs/executor/OPEN_READING_COMMENTS_REPORT.md
+
+  E04:
+    status: done
+    head_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
+    evaluation_ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464529539
+    evaluation_ci_conclusion: success
+    result: |
+      RED: c1d6ca05ce1821d9efca2c168a696170ea049442
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464368773
+      FAILURE as expected: generic Payload reader creation resolved for spoofed-author,
+      mismatched story/chapter, and parent reply attempts.
+      GREEN: dc1619c76d194c26e35bb39afd2b1a2534d34958
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464529539
+      SUCCESS: PostgreSQL 16 quality gate completed 64 integration tests, 11 Chrome E2E
+      tests, lint (2 warnings, 0 errors), build, and guardrails. Generic reader creates
+      now require a server-only local Payload context supplied only after the helper
+      derives a published chapter and story. Independent review found no remaining issue.
+      Local PostgreSQL remains unavailable and is diagnostic only.
+    changed_files:
+      - app/src/collections/Comments.ts
+      - app/src/utilities/readerComments.ts
+      - app/tests/int/comments.test.ts
