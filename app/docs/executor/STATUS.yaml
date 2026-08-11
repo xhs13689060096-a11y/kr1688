@@ -1,15 +1,20 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-2D-READER-LOOP
 state: doing
-next_task: E05-final-acceptance-review
+next_task: E06-ssr-quality-repair
 branch: marvis/ops-01-automated-acceptance
 head_sha: d80e054f31f811073eca7aa08cd57e0ec8e28289
 evaluation_sha: d80e054f31f811073eca7aa08cd57e0ec8e28289
 ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31465993624
 ci_conclusion: success
 acceptance_requested: false
-acceptance_status: pending_final_review
-review_blocker: none
+acceptance_status: returned_for_ssr_quality_repair
+review_blocker: |
+  Final Phase 2D review did not approve d80e054 despite successful CI because its E2E
+  web server logged two unhandled SSR TypeErrors (digest 1080787956) that the current
+  tests did not fail on. E06 must identify and remove or explicitly detect that server
+  error, and extend content-access tests to deny all six reader write operations before
+  a new final review.
 updated: 2026-08-11
 source_of_truth: true
 
