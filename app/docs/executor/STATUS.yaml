@@ -1,15 +1,19 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-2D-READER-LOOP
 state: doing
-next_task: E04-final-acceptance-review
+next_task: E05-content-access-boundary-repair
 branch: marvis/ops-01-automated-acceptance
 head_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
 evaluation_sha: dc1619c76d194c26e35bb39afd2b1a2534d34958
 ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464529539
 ci_conclusion: success
 acceptance_requested: false
-acceptance_status: E04_verified_pending_phase_acceptance
-review_blocker: null
+acceptance_status: returned_for_content_access_repair
+review_blocker: |
+  Final Phase 2D review found readers can create, update, and delete stories and chapters
+  through generic Payload APIs, and non-admin reads expose draft stories, archived chapters,
+  and published chapters belonging to draft stories. E05 must enforce administrator-only
+  content writes and published story/chapter-only non-admin reads before acceptance.
 updated: 2026-08-11
 source_of_truth: true
 
@@ -253,3 +257,14 @@ tasks:
       - app/src/collections/Comments.ts
       - app/src/utilities/readerComments.ts
       - app/tests/int/comments.test.ts
+
+  E05:
+    status: doing
+    result: |
+      Final Phase 2D review returned the packet for content access repair. The approved
+      minimal design and execution plan are in docs/superpowers; no E05 production change
+      has been made yet. Exact E04 documentation evidence remains de03b2b3bab1372f97fac2f4602018b7eeae0c0b
+      (https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31464906823, SUCCESS).
+    changed_files:
+      - app/docs/superpowers/specs/2026-08-11-content-access-boundary-design.md
+      - app/docs/superpowers/plans/2026-08-11-content-access-boundary.md
