@@ -1,4 +1,4 @@
-import type { Comment } from '@/payload-types'
+import type { Chapter, Comment, Story } from '@/payload-types'
 import type { ReaderRequestContext } from '@/utilities/readerRequest'
 
 type PublishedCommentInput = {
@@ -51,24 +51,34 @@ export async function createPublishedComment(context: ReaderRequestContext, inpu
     throw new Error('Invalid comment')
   }
 
-  const chapter = await context.payload.findByID({
-    collection: 'chapters',
-    id: chapterId,
-    req: context.req,
-    overrideAccess: false,
-    depth: 0,
-  })
+  let chapter: Chapter
+  try {
+    chapter = await context.payload.findByID({
+      collection: 'chapters',
+      id: chapterId,
+      req: context.req,
+      overrideAccess: false,
+      depth: 0,
+    })
+  } catch {
+    throw new Error('Published chapter required')
+  }
   if (chapter.status !== 'published') {
     throw new Error('Published chapter required')
   }
   const storyId = typeof chapter.story === 'object' ? chapter.story.id : chapter.story
-  const story = await context.payload.findByID({
-    collection: 'stories',
-    id: storyId,
-    req: context.req,
-    overrideAccess: false,
-    depth: 0,
-  })
+  let story: Story
+  try {
+    story = await context.payload.findByID({
+      collection: 'stories',
+      id: storyId,
+      req: context.req,
+      overrideAccess: false,
+      depth: 0,
+    })
+  } catch {
+    throw new Error('Published chapter required')
+  }
   if (story.contentStatus !== 'published') {
     throw new Error('Published chapter required')
   }

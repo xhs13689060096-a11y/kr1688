@@ -1,4 +1,19 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Where } from 'payload'
+
+const publicChapterReadWhere: Where = {
+  and: [
+    {
+      status: {
+        equals: 'published',
+      },
+    },
+    {
+      'story.contentStatus': {
+        equals: 'published',
+      },
+    },
+  ],
+}
 
 export const Chapters: CollectionConfig = {
   slug: 'chapters',
@@ -12,20 +27,7 @@ export const Chapters: CollectionConfig = {
     read: ({ req: { user } }) => {
       if (user?.role === 'admin') return true
 
-      return {
-        and: [
-          {
-            status: {
-              equals: 'published',
-            },
-          },
-          {
-            'story.contentStatus': {
-              equals: 'published',
-            },
-          },
-        ],
-      }
+      return publicChapterReadWhere
     },
     update: ({ req: { user } }) => user?.role === 'admin',
   },
