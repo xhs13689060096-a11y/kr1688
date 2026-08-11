@@ -95,6 +95,39 @@ describe('E05 — content access boundary', () => {
 
     await expect(
       payload.delete({
+        collection: 'stories',
+        id: story.id,
+        req: { user: reader },
+        overrideAccess: false,
+      } as never),
+    ).rejects.toThrow()
+
+    await expect(
+      payload.create({
+        collection: 'chapters',
+        data: {
+          titleAr: 'محاولة فصل قارئ',
+          chapterNumber: 2,
+          story: story.id,
+          status: 'published',
+        },
+        req: { user: reader },
+        overrideAccess: false,
+      } as never),
+    ).rejects.toThrow()
+
+    await expect(
+      payload.update({
+        collection: 'chapters',
+        id: chapter.id,
+        data: { status: 'published' },
+        req: { user: reader },
+        overrideAccess: false,
+      } as never),
+    ).rejects.toThrow()
+
+    await expect(
+      payload.delete({
         collection: 'chapters',
         id: chapter.id,
         req: { user: reader },
