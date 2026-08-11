@@ -1,11 +1,11 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-3A-VERCEL-NEON-LAUNCH
 state: doing
-next_task: P3A03-create-and-verify-production-migration
+next_task: P3A04-deploy-and-verify-production-candidate
 branch: marvis/ops-01-automated-acceptance
-head_sha: ccd7533f9301c53e8fef62f9c9b84d00f04f5d64
-evaluation_sha: ccd7533f9301c53e8fef62f9c9b84d00f04f5d64
-ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31474692185
+head_sha: 176b2d531ba1a852356f131ed076721e063dcf12
+evaluation_sha: 176b2d531ba1a852356f131ed076721e063dcf12
+ci_url: https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31509099477
 ci_conclusion: success
 acceptance_requested: false
 acceptance_status: phase_2d_approved_phase_3a_in_progress
@@ -361,3 +361,31 @@ tasks:
       - app/docs/executor/STATUS.yaml
       - app/docs/superpowers/specs/2026-08-11-phase-3a-vercel-neon-launch-design.md
       - app/docs/superpowers/plans/2026-08-11-phase-3a-vercel-neon-launch.md
+
+  P3A03:
+    status: done
+    head_sha: 176b2d531ba1a852356f131ed076721e063dcf12
+    result: |
+      RED: c89dca7c5488616972b58e6e86e744b3212cf56c
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31508378772
+      FAILURE as expected: after `payload migrate` found no committed migration,
+      PostgreSQL reported all seven required application tables as absent.
+      GREEN: 37f843aac95b00017b1a85d972b6b36415bc8827
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31508660954
+      SUCCESS: the initial Payload migration applied to empty disposable
+      PostgreSQL before Payload initialization, the migration boundary found all
+      required tables, and the complete integration, Chrome E2E, build, lint,
+      and guardrail quality gate completed. Vercel now uses `vercel-build` to
+      run pending migrations before the normal build. Neon production was not
+      accessed while generating or validating the migration.
+      Snapshot completion: 176b2d531ba1a852356f131ed076721e063dcf12
+      https://github.com/xhs13689060096-a11y/kr1688/actions/runs/31509099477
+      SUCCESS: the generated Drizzle schema snapshot required for future
+      differential migrations is committed; the complete quality gate repeated
+      successfully on the exact snapshot SHA.
+    changed_files:
+      - app/package.json
+      - app/src/migrations/20260811_154257_initial_schema.ts
+      - app/src/migrations/20260811_154257_initial_schema.json
+      - app/src/migrations/index.ts
+      - app/tests/int/production-migration.test.ts
