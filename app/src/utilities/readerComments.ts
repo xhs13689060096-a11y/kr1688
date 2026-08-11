@@ -8,8 +8,15 @@ type PublishedCommentInput = {
 
 type PublishedCommentData = Omit<Comment, 'id' | 'updatedAt' | 'createdAt' | 'author'>
 
-const protectedReaderCommentInputFields = ['author', 'story', 'chapter', 'parent', 'status'] as const
+const protectedReaderCommentInputFields = [
+  'author',
+  'story',
+  'chapter',
+  'parent',
+  'status',
+] as const
 const allowedReaderCommentInputFields = new Set(['chapterId', 'body'])
+const readerCommentCreationContext = { readerCommentCreation: true }
 
 function assertPublishedCommentInput(input: unknown): asserts input is PublishedCommentInput {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
@@ -29,10 +36,7 @@ function assertPublishedCommentInput(input: unknown): asserts input is Published
   }
 }
 
-export async function createPublishedComment(
-  context: ReaderRequestContext,
-  input: unknown,
-) {
+export async function createPublishedComment(context: ReaderRequestContext, input: unknown) {
   assertPublishedCommentInput(input)
   const chapterId = input.chapterId
   const body = input.body
@@ -106,10 +110,11 @@ export async function createPublishedComment(
 
   // `author` and `status` are intentionally absent. The Comments beforeValidate
   // hook derives the author from context.req.user and publishes reader comments.
-  // Payload's generated document type does not model that hook, so this is the sole
-  // typed boundary.
+  // The local-only context grants the collection's create capability after this
+  // helper has derived published story and chapter context.
   return (await context.payload.create({
     collection: 'comments',
+    context: readerCommentCreationContext,
     draft: false,
     req: context.req,
     overrideAccess: false,

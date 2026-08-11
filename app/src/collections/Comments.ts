@@ -1,7 +1,5 @@
 import type { CollectionConfig, Where } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-
 const readerForbiddenCommentFields = new Set(['author', 'story', 'chapter', 'parent', 'status'])
 
 export function assertReaderCommentPatch(data: Record<string, unknown>): void {
@@ -30,7 +28,10 @@ export const Comments: CollectionConfig = {
     plural: 'Comments',
   },
   access: {
-    create: authenticated,
+    create: ({ req }): boolean => {
+      if (req.user?.role === 'admin') return true
+      return req.user?.role === 'reader' && req.context?.readerCommentCreation === true
+    },
     read: ({ req: { user } }): Where | boolean => {
       if (!user) {
         return { status: { equals: 'published' } }
