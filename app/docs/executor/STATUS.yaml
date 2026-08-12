@@ -1,7 +1,7 @@
 packet_id: KR1688-EXECUTION-02-READER-LOOP
 phase: PHASE-3A-VERCEL-NEON-LAUNCH
 state: doing
-next_task: P3A04-resolve-vercel-upload-and-deploy-candidate
+next_task: P3A04-preview-QA-and-hosting-reconciliation
 branch: marvis/ops-01-automated-acceptance
 head_sha: 041858b8eabeebed8c7c97b39e874f546876f961
 evaluation_sha: 041858b8eabeebed8c7c97b39e874f546876f961
@@ -10,7 +10,7 @@ ci_conclusion: success
 acceptance_requested: false
 acceptance_status: phase_2d_approved_phase_3a_in_progress
 review_blocker: P3A04 Vercel file upload API returned truncated JSON twice
-updated: 2026-08-11
+updated: 2026-08-12
 source_of_truth: true
 
 tasks:
@@ -404,5 +404,24 @@ tasks:
       response. Two attempts for the same root cause are exhausted, so no third
       deploy was attempted. Neon migration did not run, no candidate URL was
       created, and no domain, DNS, or retired-project setting changed.
+
+      Platform reconciliation record (owner-provided, 2026-08-12; secret values
+      intentionally not recorded): the active Git-connected Vercel project is
+      `kr1688-reader / kr1688`, project ID `prj_bS2Rz8DAbb3e91SBcmPselPIIf6Y`.
+      It is connected to `xhs13689060096-a11y/kr1688`, has production branch
+      `main`, Root Directory `app`, Node `24.x`, framework reported as `null`,
+      and protection `all_except_custom_domains`. Its five required environment
+      variable names are present for both Preview and Production:
+      DATABASE_URL, PAYLOAD_SECRET, CRON_SECRET, PREVIEW_SECRET, and
+      NEXT_PUBLIC_SERVER_URL. Values are not recorded here.
+
+      Current hosting evidence (owner-provided, 2026-08-12): Production deployment
+      `dpl_6dk54z9uWTfc3oLarTBH6ZZCez63` serves `kr1688-three.vercel.app`;
+      Preview deployment `dpl_3mCJyavCumiuxsGPrqg1GvpfQg5a` serves
+      `kr1688-git-marvis-ops-01-automated-acceptance-kr1688-reader.vercel.app`.
+      This project ID differs from the earlier isolated CLI project
+      `prj_4qZdeJTXzfo1bGrDwK98IgmPWoqF`; no deletion, transfer, disconnect,
+      domain, DNS, or old-trade-site action is authorized while ownership and
+      candidate QA are reconciled.
     blocker: Vercel CLI file upload API transport returns Unexpected end of JSON input
-    next_safe_action: use a materially different upload path after Codex review
+    next_safe_action: complete read-only QA against the owner-recorded Git Preview and reconcile Vercel project ownership before any production action
